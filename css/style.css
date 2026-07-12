@@ -1,0 +1,252 @@
+:root {
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #1a1a1a;
+    --bg-card: #252525;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --accent: #7c3aed;
+    --accent-light: #a78bfa;
+    --success: #22c55e;
+    --warning: #eab308;
+    --danger: #ef4444;
+    --border: #333333;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+.header {
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+    padding: 1.5rem 2rem;
+    text-align: center;
+    border-bottom: 2px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent-light), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.reloj {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    font-family: 'Courier New', monospace;
+}
+
+.main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.seccion {
+    margin-bottom: 2.5rem;
+}
+
+.seccion h2 {
+    font-size: 1.3rem;
+    color: var(--accent-light);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.2rem;
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.2);
+}
+
+.card.loading {
+    opacity: 0.6;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.card-titulo {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-valor {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.card-subvalor {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 0.3rem;
+}
+
+.card-verde .card-valor { color: var(--success); }
+.card-amarillo .card-valor { color: var(--warning); }
+.card-rojo .card-valor { color: var(--danger); }
+
+.clima-grupo {
+    margin-bottom: 1.5rem;
+}
+
+.clima-titulo {
+    font-size: 1.1rem;
+    color: var(--accent-light);
+    margin-bottom: 0.75rem;
+    padding-left: 0.25rem;
+}
+
+.alertas {
+    margin-top: 1rem;
+}
+
+.alerta {
+    background: var(--bg-card);
+    border-left: 4px solid var(--warning);
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.9rem;
+}
+
+.alerta-roja {
+    border-left-color: var(--danger);
+}
+
+.alerta-verde {
+    border-left-color: var(--success);
+}
+
+.arribos-grupo {
+    margin-bottom: 1.5rem;
+}
+
+.arribos-subtitulo {
+    font-size: 1.05rem;
+    color: var(--accent-light);
+    margin-bottom: 0.5rem;
+    padding-left: 0.25rem;
+}
+
+.tabla-arribos {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.tabla-arribos th {
+    background: var(--bg-secondary);
+    color: var(--accent-light);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tabla-arribos td {
+    padding: 0.6rem 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.95rem;
+}
+
+.tabla-arribos tr:hover {
+    background: rgba(124, 58, 237, 0.08);
+}
+
+.arribo-urgente td {
+    color: var(--success);
+    font-weight: 700;
+}
+
+.arribo-proximo td {
+    color: var(--warning);
+}
+
+.arribo-cancelado {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+@media (max-width: 600px) {
+    .tabla-arribos {
+        font-size: 0.85rem;
+    }
+    .tabla-arribos th,
+    .tabla-arribos td {
+        padding: 0.4rem 0.5rem;
+    }
+}
+
+.footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+}
+
+.footer p {
+    margin-bottom: 0.3rem;
+}
+
+.error {
+    color: var(--danger);
+    font-style: italic;
+}
+
+@media (max-width: 600px) {
+    .header h1 {
+        font-size: 1.4rem;
+    }
+    
+    .cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-valor {
+        font-size: 1.3rem;
+    }
+}
