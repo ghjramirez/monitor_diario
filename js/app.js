@@ -106,27 +106,14 @@ async function cargarClima() {
 
   const weatherMap = {
     113: '☀️ Soleado',
-    116: '⛅ Parcial nublado',
+    116: '⛅ Parc. nublado',
     119: '☁️ Nublado',
     122: '☁️ Muy nublado',
     143: '🌫️ Niebla',
     176: '🌦️ Lluvia ligera',
     200: '⛈️ Tormenta',
-    293: '🌦️ Lluvia ligera',
     296: '🌧️ Lluvia',
-    299: '🌧️ Lluvia intensa',
     302: '🌧️ Lluvia fuerte',
-    305: '🌧️ Lluvia muy fuerte',
-    308: '🌧️ Lluvia extrema',
-    311: '🌧️ Lluvia ligera',
-    314: '🌧️ Lluvia',
-    320: '🌨️ Nieve ligera',
-    323: '🌨️ Nieve',
-    329: '❄️ Nieve',
-    332: '❄️ Nieve intensa',
-    356: '🌧️ Chubasco fuerte',
-    359: '🌧️ Tormenta',
-    386: '⛈️ Tormenta',
     389: '⛈️ Tormenta fuerte',
   };
 
