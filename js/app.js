@@ -383,8 +383,62 @@ function actualizarTimestamp() {
     timestamp;
 }
 
+function cargarTemporal() {
+  const contenedor = document.getElementById('temporal-cards');
+  const ahora = new Date();
+  const anio = ahora.getFullYear();
+  const mes = ahora.getMonth();
+  const diaMes = ahora.getDate();
+  const diaDelAnio =
+    Math.floor((ahora - new Date(anio, 0, 1)) / 86400000) + 1;
+  const totalDiasAnio =
+    (anio % 4 === 0 && anio % 100 !== 0) || anio % 400 === 0
+      ? 366
+      : 365;
+  const diasRestantesAnio = totalDiasAnio - diaDelAnio;
+  const totalDiasMes = new Date(anio, mes + 1, 0).getDate();
+  const diasRestantesMes = totalDiasMes - diaMes;
+
+  const pctAnio = (diaDelAnio / totalDiasAnio) * 100;
+  const pctMes = (diaMes / totalDiasMes) * 100;
+
+  const diaSemana = new Date(anio, 0, 1).getDay();
+  const semanaActual = Math.ceil((diaDelAnio + diaSemana) / 7);
+  const totalSemanas = Math.ceil((totalDiasAnio + diaSemana) / 7);
+
+  contenedor.innerHTML = `
+    <div class="card">
+      <div class="card-titulo">📊 Semana</div>
+      <div class="card-valor">Semana ${semanaActual} de ${totalSemanas}</div>
+      <div class="card-subvalor">${totalSemanas - semanaActual} restantes</div>
+    </div>
+    <div class="card">
+      <div class="card-titulo">🗓️ Día del año</div>
+      <div class="card-valor">Día ${diaDelAnio} de ${totalDiasAnio}</div>
+      <div class="card-subvalor">${diasRestantesAnio} restantes (${(100 - pctAnio).toFixed(1)}%)</div>
+    </div>
+    <div class="card">
+      <div class="card-titulo">🌎 Año ${anio}</div>
+      <div class="card-valor">${totalDiasAnio === 366 ? 'Bisiesto' : 'No bisiesto'}</div>
+      <div class="barra-progreso">
+        <div class="barra-fill" style="width: ${pctAnio.toFixed(1)}%"></div>
+      </div>
+      <div class="card-subvalor">Progreso del año: ${pctAnio.toFixed(1)}%</div>
+    </div>
+    <div class="card">
+      <div class="card-titulo">📆 ${MESES[mes]}</div>
+      <div class="card-valor">Día ${diaMes} de ${totalDiasMes}</div>
+      <div class="barra-progreso">
+        <div class="barra-fill" style="width: ${pctMes.toFixed(1)}%"></div>
+      </div>
+      <div class="card-subvalor">${diasRestantesMes} restantes (${(100 - pctMes).toFixed(1)}%)</div>
+    </div>
+  `;
+}
+
 async function cargarTodos() {
   await Promise.all([
+    cargarTemporal(),
     cargarDolar(),
     cargarClima(),
     cargarTrenes(),
