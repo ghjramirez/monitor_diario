@@ -66,11 +66,10 @@ async function cargarDolar() {
       throw new Error('Error al obtener cotizaciones');
     const datos = await respuesta.json();
 
-    const tiposRelevantes = ['oficial', 'blue', 'bolsa', 'tarjeta'];
+    const tiposRelevantes = ['oficial', 'blue', 'tarjeta'];
     const nombres = {
       oficial: 'Dólar Oficial',
       blue: 'Dólar Blue',
-      bolsa: 'Dólar MEP',
       tarjeta: 'Dólar Tarjeta',
     };
 
@@ -162,7 +161,6 @@ async function cargarClima() {
                     <div class="card">
                         <div class="card-titulo">Viento</div>
                         <div class="card-valor">${actual.windspeedKmph} km/h</div>
-                        <div class="card-subvalor">${actual.winddir16Point}</div>
                     </div>
                 </div>
             </div>
@@ -342,14 +340,18 @@ function renderTablaArribos(titulo, arribos, esSalida) {
     `;
 }
 
-function filtrarArribos(datos) {
+function filtrarArribos(datos, sentido) {
   return (datos.results || [])
     .filter((a) => {
       const nombre =
         a.servicio && a.servicio.ramal && a.servicio.ramal.nombre;
-      return RAMALES_FILTRADOS.includes(nombre);
+      const matchRamal = RAMALES_FILTRADOS.includes(nombre);
+      const matchSentido =
+        sentido === undefined ||
+        (a.servicio && a.servicio.sentido === sentido);
+      return matchRamal && matchSentido;
     })
-    .slice(0, 10);
+    .slice(0, 4);
 }
 
 async function cargarArribos() {
@@ -366,8 +368,8 @@ async function cargarArribos() {
     const datosConst = await resConst.json();
     const datosQuilmes = await resQuilmes.json();
 
-    const salidasConst = filtrarArribos(datosConst);
-    const llegadasQuilmes = filtrarArribos(datosQuilmes);
+    const salidasConst = filtrarArribos(datosConst, 1);
+    const llegadasQuilmes = filtrarArribos(datosQuilmes, 2);
 
     contenedor.innerHTML =
       renderTablaArribos(
@@ -376,7 +378,7 @@ async function cargarArribos() {
         true,
       ) +
       renderTablaArribos(
-        'Llegadas a Quilmes',
+        'Llegadas a Quilmes desde La Plata / Bosques',
         llegadasQuilmes,
         false,
       );
