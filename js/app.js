@@ -410,7 +410,7 @@ function cargarTemporal() {
     <div class="card">
       <div class="card-titulo">📊 Semana</div>
       <div class="card-valor">Semana ${semanaActual} de ${totalSemanas}</div>
-      <div class="card-subvalor">${totalSemanas - semanaActual} restantes</div>
+      <div class="card-subvalor">${totalSemanas - semanaActual} restantes (${((totalSemanas - semanaActual) / totalSemanas * 100).toFixed(1)}%)</div>
     </div>
     <div class="card">
       <div class="card-titulo">🗓️ Día del año</div>

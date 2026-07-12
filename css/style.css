@@ -2,10 +2,10 @@
   --bg-primary: #e2dbc7;
   --bg-card: #f6f4ef;
   --text-primary: #2b2b2b;
-  --text-secondary: #616161;
+  --text-secondary: #505050;
   --accent: #a3875c;
-  --accent-light: #c4a97d;
-  --accent-bg: #f3ede3;
+  --accent-light: #ccc3b5;
+  --accent-bg: #d6cab5;
   --success: #5d9a6a;
   --warning: #cf9925;
   --danger: #c25858;
@@ -139,7 +139,7 @@ body {
 
 .barra-progreso {
   width: 100%;
-  height: 8px;
+  height: 11px;
   background: var(--accent-bg);
   border-radius: 4px;
   margin-top: 0.6rem;
