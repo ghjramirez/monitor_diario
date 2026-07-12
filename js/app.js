@@ -44,10 +44,9 @@ function actualizarReloj() {
   const anio = ahora.getFullYear();
   const horas = String(ahora.getHours()).padStart(2, '0');
   const minutos = String(ahora.getMinutes()).padStart(2, '0');
-  const segundos = String(ahora.getSeconds()).padStart(2, '0');
 
   document.getElementById('reloj').textContent =
-    `${dia} ${numero} de ${mes} ${anio} - ${horas}:${minutos}:${segundos}`;
+    `${dia} ${numero} de ${mes} ${anio} - ${horas}:${minutos}`;
 }
 
 function formatearMoneda(valor) {
@@ -338,7 +337,7 @@ function filtrarArribos(datos, sentido) {
         (a.servicio && a.servicio.sentido === sentido);
       return matchRamal && matchSentido;
     })
-    .slice(0, 4);
+    .slice(0, 3);
 }
 
 async function cargarArribos() {
@@ -410,28 +409,29 @@ function cargarTemporal() {
     <div class="card">
       <div class="card-titulo">📊 Semana</div>
       <div class="card-valor">Semana ${semanaActual} de ${totalSemanas}</div>
-      <div class="card-subvalor">${totalSemanas - semanaActual} restantes (${((totalSemanas - semanaActual) / totalSemanas * 100).toFixed(1)}%)</div>
+      <div class="card-subvalor">${totalSemanas - semanaActual} restantes (${(((totalSemanas - semanaActual) / totalSemanas) * 100).toFixed(1)}%)</div>
     </div>
     <div class="card">
-      <div class="card-titulo">🗓️ Día del año</div>
+      <div class="card-titulo">🗓️ Día</div>
       <div class="card-valor">Día ${diaDelAnio} de ${totalDiasAnio}</div>
       <div class="card-subvalor">${diasRestantesAnio} restantes (${(100 - pctAnio).toFixed(1)}%)</div>
     </div>
     <div class="card">
-      <div class="card-titulo">🌎 Año ${anio}</div>
-      <div class="card-valor">${totalDiasAnio === 366 ? 'Bisiesto' : 'No bisiesto'}</div>
+      <div class="card-titulo">🌎 Año</div>
+      <div class="card-valor">${anio} - ${totalDiasAnio === 366 ? 'Bisiesto' : 'No bisiesto'}</div>
       <div class="barra-progreso">
         <div class="barra-fill" style="width: ${pctAnio.toFixed(1)}%"></div>
       </div>
       <div class="card-subvalor">Progreso del año: ${pctAnio.toFixed(1)}%</div>
     </div>
     <div class="card">
-      <div class="card-titulo">📆 ${MESES[mes]}</div>
-      <div class="card-valor">Día ${diaMes} de ${totalDiasMes}</div>
+      <div class="card-titulo">📆 MES</div>
+      <div class="card-valor">${MESES[mes]} - Día ${diaMes} de ${totalDiasMes}</div>
       <div class="barra-progreso">
         <div class="barra-fill" style="width: ${pctMes.toFixed(1)}%"></div>
       </div>
-      <div class="card-subvalor">${diasRestantesMes} restantes (${(100 - pctMes).toFixed(1)}%)</div>
+      <div class="card-subvalor">Progreso del mes: ${pctMes.toFixed(1)}%</div>
+      <div class="card-subvalor">${diasRestantesMes} restantes</div>
     </div>
   `;
 }
