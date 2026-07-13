@@ -118,13 +118,12 @@ body {
 
 .seccion-contenido {
   overflow: hidden;
-  max-height: 2000px;
   transition: max-height 0.35s ease, opacity 0.25s ease;
   opacity: 1;
 }
 
 .seccion.colapsada .seccion-contenido {
-  max-height: 0;
+  max-height: 0 !important;
   opacity: 0;
 }
 
@@ -256,6 +255,11 @@ body {
   margin-top: 1rem;
 }
 
+.alertas-titulo {
+  margin-bottom: 0.5rem;
+  color: var(--warning);
+}
+
 .alerta {
   background: var(--alerta-bg);
   border-left: 3px solid var(--warning);
@@ -266,12 +270,13 @@ body {
   color: var(--text-primary);
 }
 
-.alerta-roja {
-  border-left-color: var(--danger);
+.card-error {
+  border-left: 3px solid var(--danger);
 }
 
-.alerta-verde {
-  border-left-color: var(--success);
+.card-error .card-valor {
+  color: var(--danger);
+  font-style: italic;
 }
 
 .arribos-grupo {
@@ -344,11 +349,6 @@ body {
 
 .footer p {
   margin-bottom: 0.25rem;
-}
-
-.error {
-  color: var(--danger);
-  font-style: italic;
 }
 
 @media (max-width: 600px) {

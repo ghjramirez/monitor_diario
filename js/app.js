@@ -4,10 +4,8 @@ const API_CLIMA_PARAMS =
   '&current=temperature_2m,relative_humidity_2m,weather_code,apparent_temperature' +
   '&daily=precipitation_probability_max,temperature_2m_max,temperature_2m_min' +
   '&forecast_days=2&timezone=America%2FArgentina%2FBuenos_Aires';
-const API_CLIMA_CABA =
-  `${API_CLIMA_BASE}?latitude=-34.6037&longitude=-58.3816${API_CLIMA_PARAMS}`;
-const API_CLIMA_QUILMES =
-  `${API_CLIMA_BASE}?latitude=-34.7233&longitude=-58.2681${API_CLIMA_PARAMS}`;
+const API_CLIMA_CABA = `${API_CLIMA_BASE}?latitude=-34.6037&longitude=-58.3816${API_CLIMA_PARAMS}`;
+const API_CLIMA_QUILMES = `${API_CLIMA_BASE}?latitude=-34.7233&longitude=-58.2681${API_CLIMA_PARAMS}`;
 const API_FERIADOS = 'https://api.argentinadatos.com/v1/feriados/';
 const API_TRENES_RAMALES =
   'https://ariedro.dev/api-trenes/infraestructura/ramales?idGerencia=11';
@@ -19,6 +17,37 @@ const RAMALES_FILTRADOS = [
   'Constitución-Bosques-Q',
   'Constitución-La Plata',
 ];
+
+const TIPOS_DOLAR = ['oficial', 'blue', 'tarjeta'];
+const NOMBRES_DOLAR = {
+  oficial: 'Dólar Oficial',
+  blue: 'Dólar Blue',
+  tarjeta: 'Dólar Tarjeta',
+};
+
+const WMO_CODES = {
+  0: '☀️ Despejado',
+  1: '☀️ Mayormente despejado',
+  2: '⛅ Parc. nublado',
+  3: '☁️ Nublado',
+  45: '🌫️ Niebla',
+  48: '🌫️ Niebla escarchada',
+  51: '🌦️ Lluvia ligera',
+  53: '🌦️ Lluvia moderada',
+  55: '🌧️ Lluvia intensa',
+  61: '🌧️ Lluvia',
+  63: '🌧️ Lluvia fuerte',
+  65: '🌧️ Lluvia extrema',
+  71: '🌨️ Nieve ligera',
+  73: '🌨️ Nieve',
+  75: '❄️ Nieve intensa',
+  80: '🌦️ Chubasco ligero',
+  81: '🌧️ Chubasco',
+  82: '🌧️ Chubasco fuerte',
+  95: '⛈️ Tormenta',
+  96: '⛈️ Tormenta con granizo',
+  99: '⛈️ Tormenta fuerte con granizo',
+};
 
 const DIAS = [
   'Domingo',
@@ -78,13 +107,22 @@ function calcularDiasFijos(anio) {
 
 function calcularDiasRelativos(anio) {
   const eventos = [
-    { calcular: (y) => ultimoWeekday(y, 5, 0), nombre: 'Día del Padre' },
-    { calcular: (y) => nthWeekday(y, 10, 0, 3), nombre: 'Día de la Madre' },
-    { calcular: (y) => {
-      const primerAgosto = new Date(y, 7, 1);
-      const diff = (6 - primerAgosto.getDay() + 7) % 7;
-      return new Date(y, 7, 1 + diff + 2 * 7);
-    }, nombre: 'Día del Niño' },
+    {
+      calcular: (y) => ultimoWeekday(y, 5, 0),
+      nombre: 'Día del Padre',
+    },
+    {
+      calcular: (y) => nthWeekday(y, 10, 0, 3),
+      nombre: 'Día de la Madre',
+    },
+    {
+      calcular: (y) => {
+        const primerAgosto = new Date(y, 7, 1);
+        const diff = (6 - primerAgosto.getDay() + 7) % 7;
+        return new Date(y, 7, 1 + diff + 2 * 7);
+      },
+      nombre: 'Día del Niño',
+    },
   ];
   return eventos.map((e) => ({
     fecha: e.calcular(anio),
@@ -94,7 +132,15 @@ function calcularDiasRelativos(anio) {
 }
 
 function toggleSeccion(id) {
-  document.getElementById(id).classList.toggle('colapsada');
+  const seccion = document.getElementById(id);
+  const contenido = seccion.querySelector('.seccion-contenido');
+  const colapsada = seccion.classList.toggle('colapsada');
+  if (!colapsada) {
+    contenido.style.maxHeight = contenido.scrollHeight + 'px';
+    contenido.addEventListener('transitionend', () => {
+      contenido.style.maxHeight = '';
+    }, { once: true });
+  }
 }
 
 function actualizarReloj() {
@@ -126,20 +172,13 @@ async function cargarDolar() {
       throw new Error('Error al obtener cotizaciones');
     const datos = await respuesta.json();
 
-    const tiposRelevantes = ['oficial', 'blue', 'tarjeta'];
-    const nombres = {
-      oficial: 'Dólar Oficial',
-      blue: 'Dólar Blue',
-      tarjeta: 'Dólar Tarjeta',
-    };
-
     const filtrados = datos.filter((d) =>
-      tiposRelevantes.includes(d.casa),
+      TIPOS_DOLAR.includes(d.casa),
     );
 
     if (filtrados.length === 0) {
       contenedor.innerHTML =
-        '<div class="card error"><div class="card-titulo">Sin datos</div><div class="card-valor">No hay cotizaciones disponibles</div></div>';
+        '<div class="card card-error"><div class="card-titulo">Sin datos</div><div class="card-valor">No hay cotizaciones disponibles</div></div>';
       return;
     }
 
@@ -147,7 +186,7 @@ async function cargarDolar() {
       .map(
         (d) => `
             <div class="card">
-                <div class="card-titulo">${nombres[d.casa] || d.nombre}</div>
+                <div class="card-titulo">${NOMBRES_DOLAR[d.casa] || d.nombre}</div>
                 <div class="card-valor">${formatearMoneda(d.venta)}</div>
                 <div class="card-subvalor">Compra: ${formatearMoneda(d.compra)}</div>
             </div>
@@ -157,41 +196,17 @@ async function cargarDolar() {
   } catch (error) {
     console.error('Error dólar:', error);
     contenedor.innerHTML =
-      '<div class="card error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los datos</div></div>';
+      '<div class="card card-error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los datos</div></div>';
   }
 }
 
 async function cargarClima() {
   const contenedor = document.getElementById('clima-cards');
 
-  const wmoCodes = {
-    0: '☀️ Soleado',
-    1: '☀️ Mayormente soleado',
-    2: '⛅ Parc. nublado',
-    3: '☁️ Nublado',
-    45: '🌫️ Niebla',
-    48: '🌫️ Niebla escarchada',
-    51: '🌦️ Lluvia ligera',
-    53: '🌦️ Lluvia moderada',
-    55: '🌧️ Lluvia intensa',
-    61: '🌧️ Lluvia',
-    63: '🌧️ Lluvia fuerte',
-    65: '🌧️ Lluvia extrema',
-    71: '🌨️ Nieve ligera',
-    73: '🌨️ Nieve',
-    75: '❄️ Nieve intensa',
-    80: '🌦️ Chubasco ligero',
-    81: '🌧️ Chubasco',
-    82: '🌧️ Chubasco fuerte',
-    95: '⛈️ Tormenta',
-    96: '⛈️ Tormenta con granizo',
-    99: '⛈️ Tormenta fuerte con granizo',
-  };
-
   function renderClima(nombre, datos) {
     const actual = datos.current;
     const codigo = actual.weather_code;
-    const desc = wmoCodes[codigo] || `🌡️ Código ${codigo}`;
+    const desc = WMO_CODES[codigo] || `🌡️ Código ${codigo}`;
     const probHoy = datos.daily.precipitation_probability_max[0];
     const probManana = datos.daily.precipitation_probability_max[1];
     const maxHoy = datos.daily.temperature_2m_max[0];
@@ -246,7 +261,7 @@ async function cargarClima() {
   } catch (error) {
     console.error('Error clima:', error);
     contenedor.innerHTML =
-      '<div class="card error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los datos</div></div>';
+      '<div class="card card-error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los datos</div></div>';
   }
 }
 
@@ -261,9 +276,7 @@ async function cargarTrenes() {
     const ramales = await respuesta.json();
 
     const ramalesFiltrados = ramales.filter(
-      (r) =>
-        r.nombre === 'Constitución-Bosques-Q' ||
-        r.nombre === 'Constitución-La Plata',
+      (r) => RAMALES_FILTRADOS.includes(r.nombre),
     );
 
     contenedorCards.innerHTML = ramalesFiltrados
@@ -293,7 +306,7 @@ async function cargarTrenes() {
 
     if (alertasActivas.length > 0) {
       contenedorAlertas.innerHTML = `
-                <h3 style="margin-bottom: 0.5rem; color: var(--warning);">Alertas Activas</h3>
+                <h3 class="alertas-titulo">Alertas Activas</h3>
                 ${alertasActivas
                   .map(
                     (alerta) => `
@@ -310,7 +323,7 @@ async function cargarTrenes() {
   } catch (error) {
     console.error('Error trenes:', error);
     contenedorCards.innerHTML =
-      '<div class="card error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los datos</div></div>';
+      '<div class="card card-error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los datos</div></div>';
   }
 }
 
@@ -352,7 +365,6 @@ function renderTablaArribos(titulo, arribos, esSalida) {
                         <th>Ramal</th>
                         <th>Hora</th>
                         <th>Andén</th>
-                        <th>Tipo</th>
                         <th>${colTiempo}</th>
                     </tr>
                 </thead>
@@ -372,9 +384,6 @@ function renderTablaArribos(titulo, arribos, esSalida) {
                         const anden = a.arribo.anden
                           ? a.arribo.anden.nombre
                           : '-';
-                        const tipo = a.servicio.tipo
-                          ? a.servicio.tipo.nombre
-                          : '-';
                         const seg = a.arribo.segundos || 0;
                         const cancelado = a.servicio.cancelacion;
                         const claseTiempo =
@@ -389,7 +398,6 @@ function renderTablaArribos(titulo, arribos, esSalida) {
                                 <td>${ramal}</td>
                                 <td>${hora}</td>
                                 <td>${anden}</td>
-                                <td>${tipo}</td>
                                 <td>${cancelado ? '❌ Cancelado' : formatearSegundos(seg)}</td>
                             </tr>
                         `;
@@ -446,7 +454,7 @@ async function cargarArribos() {
   } catch (error) {
     console.error('Error arribos:', error);
     contenedor.innerHTML =
-      '<div class="card error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los arribos</div></div>';
+      '<div class="card card-error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los arribos</div></div>';
   }
 }
 
@@ -477,7 +485,7 @@ function cargarTemporal() {
   const pctMes = (diaMes / totalDiasMes) * 100;
 
   const diaSemana = new Date(anio, 0, 1).getDay();
-  const semanaActual = Math.ceil((diaDelAnio + diaSemana) / 7);
+  const semanaActual = Math.floor((diaDelAnio - 1 + diaSemana) / 7) + 1;
   const totalSemanas = Math.ceil((totalDiasAnio + diaSemana) / 7);
 
   contenedor.innerHTML = `
@@ -511,7 +519,7 @@ function cargarTemporal() {
   `;
 }
 
-function cargarFeriados() {
+async function cargarFeriados() {
   const contenedor = document.getElementById('feriados-cards');
   const anio = new Date().getFullYear();
   const hoy = new Date();
@@ -522,48 +530,46 @@ function cargarFeriados() {
     ...calcularDiasRelativos(anio),
   ];
 
-  fetch(`${API_FERIADOS}${anio}`)
-    .then((r) => {
-      if (!r.ok) throw new Error('Error al obtener feriados');
-      return r.json();
-    })
-    .then((feriadosApi) => {
-      const feriadosNormalizados = feriadosApi.map((f) => ({
-        fecha: new Date(f.fecha + 'T00:00:00'),
-        nombre: f.nombre,
-        tipo: f.tipo,
-      }));
+  try {
+    const respuesta = await fetch(`${API_FERIADOS}${anio}`);
+    if (!respuesta.ok) throw new Error('Error al obtener feriados');
+    const feriadosApi = await respuesta.json();
 
-      const todos = [...feriadosNormalizados, ...eventosLocales]
-        .filter((f) => f.fecha >= hoy)
-        .sort((a, b) => a.fecha - b.fecha)
-        .slice(0, 4);
+    const feriadosNormalizados = feriadosApi.map((f) => ({
+      fecha: new Date(f.fecha + 'T00:00:00'),
+      nombre: f.nombre,
+      tipo: f.tipo,
+    }));
 
-      if (todos.length === 0) {
-        contenedor.innerHTML =
-          '<div class="card"><div class="card-titulo">Sin datos</div><div class="card-valor">No hay feriados próximos</div></div>';
-        return;
-      }
+    const todos = [...feriadosNormalizados, ...eventosLocales]
+      .filter((f) => f.fecha >= hoy)
+      .sort((a, b) => a.fecha - b.fecha)
+      .slice(0, 4);
 
-      contenedor.innerHTML = todos
-        .map((f) => {
-          const dia = String(f.fecha.getDate()).padStart(2, '0');
-          const mes = MESES[f.fecha.getMonth()];
-          return `
-                <div class="card">
-                    <div class="card-titulo">📅 ${dia} de ${mes}</div>
-                    <div class="card-valor">${f.nombre}</div>
-                    ${f.tipo !== 'evento' ? `<div class="card-subvalor">${f.tipo.charAt(0).toUpperCase() + f.tipo.slice(1)}</div>` : ''}
-                </div>
-            `;
-        })
-        .join('');
-    })
-    .catch((error) => {
-      console.error('Error feriados:', error);
+    if (todos.length === 0) {
       contenedor.innerHTML =
-        '<div class="card error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los feriados</div></div>';
-    });
+        '<div class="card"><div class="card-titulo">Sin datos</div><div class="card-valor">No hay feriados próximos</div></div>';
+      return;
+    }
+
+    contenedor.innerHTML = todos
+      .map((f) => {
+        const dia = String(f.fecha.getDate()).padStart(2, '0');
+        const mes = MESES[f.fecha.getMonth()];
+        return `
+              <div class="card">
+                  <div class="card-titulo">📅 ${dia} de ${mes}</div>
+                  <div class="card-valor">${f.nombre}</div>
+                  ${f.tipo !== 'evento' ? `<div class="card-subvalor">${f.tipo.charAt(0).toUpperCase() + f.tipo.slice(1)}</div>` : ''}
+              </div>
+          `;
+      })
+      .join('');
+  } catch (error) {
+    console.error('Error feriados:', error);
+    contenedor.innerHTML =
+      '<div class="card card-error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los feriados</div></div>';
+  }
 }
 
 async function cargarTodos() {
