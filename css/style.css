@@ -67,6 +67,7 @@ body {
   font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+  white-space: pre-line;
 }
 
 .main {
@@ -379,5 +380,20 @@ body {
   .tabla-arribos th,
   .tabla-arribos td {
     padding: 0.4rem 0.5rem;
+  }
+
+  .cards-compact {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

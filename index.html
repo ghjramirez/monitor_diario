@@ -7,6 +7,8 @@
       content="width=device-width, initial-scale=1.0"
     />
     <title>Monitor Diario</title>
+    <meta name="description" content="Monitor Diario - Información útil: dólar, clima, trenes y más" />
+    <meta name="theme-color" content="#e1d5c4" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,9 +17,9 @@
     />
     <link rel="stylesheet" href="css/style.css" />
     <link
-      rel="shortcut icon"
+      rel="icon"
       href="./assets/info.png"
-      type="image/x-icon"
+      type="image/png"
     />
   </head>
   <body>
@@ -27,11 +29,11 @@
 
     <main class="main">
       <section class="seccion" id="temporal">
-        <button class="seccion-toggle" onclick="toggleSeccion('temporal')">
+        <button class="seccion-toggle" aria-expanded="true" aria-controls="temporal-contenido">
           <h2>Info Temporal</h2>
           <span class="flecha">▾</span>
         </button>
-        <div class="seccion-contenido">
+        <div class="seccion-contenido" id="temporal-contenido">
           <div class="cards" id="temporal-cards">
             <div class="card loading">
               <div class="card-titulo">Cargando...</div>
@@ -41,11 +43,11 @@
       </section>
 
       <section class="seccion" id="feriados">
-        <button class="seccion-toggle" onclick="toggleSeccion('feriados')">
+        <button class="seccion-toggle" aria-expanded="true" aria-controls="feriados-contenido">
           <h2>Feriados y Eventos</h2>
           <span class="flecha">▾</span>
         </button>
-        <div class="seccion-contenido">
+        <div class="seccion-contenido" id="feriados-contenido">
           <div class="cards cards-compact" id="feriados-cards">
             <div class="card loading">
               <div class="card-titulo">Cargando...</div>
@@ -55,11 +57,11 @@
       </section>
 
       <section class="seccion" id="dolar">
-        <button class="seccion-toggle" onclick="toggleSeccion('dolar')">
+        <button class="seccion-toggle" aria-expanded="true" aria-controls="dolar-contenido">
           <h2>Cotización dólar</h2>
           <span class="flecha">▾</span>
         </button>
-        <div class="seccion-contenido">
+        <div class="seccion-contenido" id="dolar-contenido">
           <div class="cards" id="dolar-cards">
             <div class="card loading">
               <div class="card-titulo">Cargando...</div>
@@ -69,11 +71,11 @@
       </section>
 
       <section class="seccion" id="clima">
-        <button class="seccion-toggle" onclick="toggleSeccion('clima')">
+        <button class="seccion-toggle" aria-expanded="true" aria-controls="clima-contenido">
           <h2>Clima</h2>
           <span class="flecha">▾</span>
         </button>
-        <div class="seccion-contenido">
+        <div class="seccion-contenido" id="clima-contenido">
           <div class="cards" id="clima-cards">
             <div class="card loading">
               <div class="card-titulo">Cargando...</div>
@@ -83,11 +85,11 @@
       </section>
 
       <section class="seccion" id="trenes">
-        <button class="seccion-toggle" onclick="toggleSeccion('trenes')">
+        <button class="seccion-toggle" aria-expanded="true" aria-controls="trenes-contenido">
           <h2>Línea Roca - Estado</h2>
           <span class="flecha">▾</span>
         </button>
-        <div class="seccion-contenido">
+        <div class="seccion-contenido" id="trenes-contenido">
           <div class="cards" id="trenes-cards">
             <div class="card loading">
               <div class="card-titulo">Cargando...</div>
@@ -98,11 +100,11 @@
       </section>
 
       <section class="seccion" id="arribos">
-        <button class="seccion-toggle" onclick="toggleSeccion('arribos')">
+        <button class="seccion-toggle" aria-expanded="true" aria-controls="arribos-contenido">
           <h2>Línea Roca - Horarios</h2>
           <span class="flecha">▾</span>
         </button>
-        <div class="seccion-contenido">
+        <div class="seccion-contenido" id="arribos-contenido">
           <div id="arribos-container">
             <div class="card loading">
               <div class="card-titulo">Cargando...</div>

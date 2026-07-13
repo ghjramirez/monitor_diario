@@ -73,6 +73,32 @@ const MESES = [
   'Diciembre',
 ];
 
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+const FETCH_TIMEOUT = 10000;
+
+async function fetchConTimeout(url, signal) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+  if (signal) {
+    signal.addEventListener('abort', () => controller.abort(), { once: true });
+  }
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 function nthWeekday(anio, mes, weekday, n) {
   const primerDia = new Date(anio, mes, 1);
   const diff = (weekday - primerDia.getDay() + 7) % 7;
@@ -134,12 +160,18 @@ function calcularDiasRelativos(anio) {
 function toggleSeccion(id) {
   const seccion = document.getElementById(id);
   const contenido = seccion.querySelector('.seccion-contenido');
+  const boton = seccion.querySelector('.seccion-toggle');
   const colapsada = seccion.classList.toggle('colapsada');
+  boton.setAttribute('aria-expanded', String(!colapsada));
   if (!colapsada) {
     contenido.style.maxHeight = contenido.scrollHeight + 'px';
-    contenido.addEventListener('transitionend', () => {
-      contenido.style.maxHeight = '';
-    }, { once: true });
+    contenido.addEventListener(
+      'transitionend',
+      () => {
+        contenido.style.maxHeight = '';
+      },
+      { once: true },
+    );
   }
 }
 
@@ -152,22 +184,24 @@ function actualizarReloj() {
   const horas = String(ahora.getHours()).padStart(2, '0');
   const minutos = String(ahora.getMinutes()).padStart(2, '0');
 
-  document.getElementById('reloj').textContent =
-    `${dia} ${numero} de ${mes} ${anio} - ${horas}:${minutos}`;
+  document.getElementById('reloj').innerHTML =
+    `${dia} ${numero} de ${mes} ${anio}<br>${horas}:${minutos}`;
 }
 
 function formatearMoneda(valor) {
+  const num = Number(valor);
+  if (isNaN(num)) return '$ -';
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
     minimumFractionDigits: 0,
-  }).format(valor);
+  }).format(num);
 }
 
-async function cargarDolar() {
+async function cargarDolar(signal) {
   const contenedor = document.getElementById('dolar-cards');
   try {
-    const respuesta = await fetch(API_DOLAR);
+    const respuesta = await fetchConTimeout(API_DOLAR, signal);
     if (!respuesta.ok)
       throw new Error('Error al obtener cotizaciones');
     const datos = await respuesta.json();
@@ -186,7 +220,7 @@ async function cargarDolar() {
       .map(
         (d) => `
             <div class="card">
-                <div class="card-titulo">${NOMBRES_DOLAR[d.casa] || d.nombre}</div>
+                <div class="card-titulo">${escapeHtml(NOMBRES_DOLAR[d.casa] || d.nombre)}</div>
                 <div class="card-valor">${formatearMoneda(d.venta)}</div>
                 <div class="card-subvalor">Compra: ${formatearMoneda(d.compra)}</div>
             </div>
@@ -194,13 +228,14 @@ async function cargarDolar() {
       )
       .join('');
   } catch (error) {
+    if (error.name === 'AbortError') return;
     console.error('Error dólar:', error);
     contenedor.innerHTML =
       '<div class="card card-error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los datos</div></div>';
   }
 }
 
-async function cargarClima() {
+async function cargarClima(signal) {
   const contenedor = document.getElementById('clima-cards');
 
   function renderClima(nombre, datos) {
@@ -234,7 +269,7 @@ async function cargarClima() {
                         <div class="card-valor">${actual.relative_humidity_2m}%</div>
                     </div>
                     <div class="card">
-                        <div class="card-titulo">🌧️ Prob. lluvia hoy</div>
+                        <div class="card-titulo">🌧️ Prob. lluvia</div>
                         <div class="card-valor">${probHoy}%</div>
                         <div class="card-subvalor">Mañana: ${probManana}%</div>
                     </div>
@@ -245,38 +280,43 @@ async function cargarClima() {
 
   try {
     const [resCaba, resQuilmes] = await Promise.all([
-      fetch(API_CLIMA_CABA),
-      fetch(API_CLIMA_QUILMES),
+      fetchConTimeout(API_CLIMA_CABA, signal),
+      fetchConTimeout(API_CLIMA_QUILMES, signal),
     ]);
 
-    if (!resCaba.ok || !resQuilmes.ok)
-      throw new Error('Error al obtener clima');
+    let html = '';
+    if (resCaba.ok) {
+      const datosCaba = await resCaba.json();
+      html += renderClima('CABA', datosCaba);
+    }
+    if (resQuilmes.ok) {
+      const datosQuilmes = await resQuilmes.json();
+      html += renderClima('Quilmes', datosQuilmes);
+    }
 
-    const datosCaba = await resCaba.json();
-    const datosQuilmes = await resQuilmes.json();
+    if (!html) throw new Error('Error al obtener clima');
 
-    contenedor.innerHTML =
-      renderClima('CABA', datosCaba) +
-      renderClima('Quilmes', datosQuilmes);
+    contenedor.innerHTML = html;
   } catch (error) {
+    if (error.name === 'AbortError') return;
     console.error('Error clima:', error);
     contenedor.innerHTML =
       '<div class="card card-error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los datos</div></div>';
   }
 }
 
-async function cargarTrenes() {
+async function cargarTrenes(signal) {
   const contenedorCards = document.getElementById('trenes-cards');
   const contenedorAlertas = document.getElementById('trenes-alertas');
 
   try {
-    const respuesta = await fetch(API_TRENES_RAMALES);
+    const respuesta = await fetchConTimeout(API_TRENES_RAMALES, signal);
     if (!respuesta.ok)
       throw new Error('Error al obtener datos de trenes');
     const ramales = await respuesta.json();
 
-    const ramalesFiltrados = ramales.filter(
-      (r) => RAMALES_FILTRADOS.includes(r.nombre),
+    const ramalesFiltrados = ramales.filter((r) =>
+      RAMALES_FILTRADOS.includes(r.nombre),
     );
 
     contenedorCards.innerHTML = ramalesFiltrados
@@ -289,7 +329,7 @@ async function cargarTrenes() {
 
         return `
                 <div class="card ${estado}">
-                    <div class="card-titulo">${ramal.nombre}</div>
+                    <div class="card-titulo">${escapeHtml(ramal.nombre)}</div>
                     <div class="card-valor">${textoEstado}</div>
                     <div class="card-subvalor">${ramal.es_electrico ? '⚡ Eléctrico' : '🚂 Diésel'}</div>
                     ${tieneAlertas ? '<div class="card-subvalor" style="color: var(--warning)">⚠️ ' + ramal.alerta.length + ' alerta(s)</div>' : ''}
@@ -311,7 +351,7 @@ async function cargarTrenes() {
                   .map(
                     (alerta) => `
                     <div class="alerta">
-                        <strong>${alerta.ramal}:</strong> ${alerta.contenido}
+                        <strong>${escapeHtml(alerta.ramal)}:</strong> ${escapeHtml(alerta.contenido)}
                     </div>
                 `,
                   )
@@ -321,6 +361,7 @@ async function cargarTrenes() {
       contenedorAlertas.innerHTML = '';
     }
   } catch (error) {
+    if (error.name === 'AbortError') return;
     console.error('Error trenes:', error);
     contenedorCards.innerHTML =
       '<div class="card card-error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los datos</div></div>';
@@ -337,11 +378,12 @@ function formatearSegundos(seg) {
 function convertirHoraISO(iso) {
   if (!iso) return '--:--';
   const d = new Date(iso);
-  return (
-    String(d.getHours()).padStart(2, '0') +
-    ':' +
-    String(d.getMinutes()).padStart(2, '0')
-  );
+  return d.toLocaleTimeString('es-AR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'America/Argentina/Buenos_Aires',
+  });
 }
 
 function renderTablaArribos(titulo, arribos, esSalida) {
@@ -371,10 +413,10 @@ function renderTablaArribos(titulo, arribos, esSalida) {
                 <tbody>
                     ${arribos
                       .map((a) => {
-                        const ramal = a.servicio.ramal.nombre.replace(
+                        const ramal = escapeHtml(a.servicio.ramal.nombre.replace(
                           'Constitución-',
                           '',
-                        );
+                        ));
                         const horaProgramada = esSalida
                           ? a.arribo.salida &&
                             a.arribo.salida.programada
@@ -382,7 +424,7 @@ function renderTablaArribos(titulo, arribos, esSalida) {
                             a.arribo.llegada.programada;
                         const hora = convertirHoraISO(horaProgramada);
                         const anden = a.arribo.anden
-                          ? a.arribo.anden.nombre
+                          ? escapeHtml(a.arribo.anden.nombre)
                           : '-';
                         const seg = a.arribo.segundos || 0;
                         const cancelado = a.servicio.cancelacion;
@@ -423,19 +465,18 @@ function filtrarArribos(datos, sentido) {
     .slice(0, 3);
 }
 
-async function cargarArribos() {
+async function cargarArribos(signal) {
   const contenedor = document.getElementById('arribos-container');
   try {
     const [resConst, resQuilmes] = await Promise.all([
-      fetch(API_TRENES_ARRIBOS_CONST),
-      fetch(API_TRENES_ARRIBOS_QUILMES),
+      fetchConTimeout(API_TRENES_ARRIBOS_CONST, signal),
+      fetchConTimeout(API_TRENES_ARRIBOS_QUILMES, signal),
     ]);
 
-    if (!resConst.ok || !resQuilmes.ok)
-      throw new Error('Error al obtener arribos');
-
-    const datosConst = await resConst.json();
-    const datosQuilmes = await resQuilmes.json();
+    let datosConst = { results: [] };
+    let datosQuilmes = { results: [] };
+    if (resConst.ok) datosConst = await resConst.json();
+    if (resQuilmes.ok) datosQuilmes = await resQuilmes.json();
 
     const salidasConst = filtrarArribos(datosConst, 1);
     const llegadasQuilmes = filtrarArribos(datosQuilmes, 2);
@@ -452,6 +493,7 @@ async function cargarArribos() {
         false,
       );
   } catch (error) {
+    if (error.name === 'AbortError') return;
     console.error('Error arribos:', error);
     contenedor.innerHTML =
       '<div class="card card-error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los arribos</div></div>';
@@ -472,7 +514,7 @@ function cargarTemporal() {
   const mes = ahora.getMonth();
   const diaMes = ahora.getDate();
   const diaDelAnio =
-    Math.floor((ahora - new Date(anio, 0, 1)) / 86400000) + 1;
+    Math.round((ahora - new Date(anio, 0, 1)) / 86400000) + 1;
   const totalDiasAnio =
     (anio % 4 === 0 && anio % 100 !== 0) || anio % 400 === 0
       ? 366
@@ -485,7 +527,8 @@ function cargarTemporal() {
   const pctMes = (diaMes / totalDiasMes) * 100;
 
   const diaSemana = new Date(anio, 0, 1).getDay();
-  const semanaActual = Math.floor((diaDelAnio - 1 + diaSemana) / 7) + 1;
+  const semanaActual =
+    Math.floor((diaDelAnio - 1 + diaSemana) / 7) + 1;
   const totalSemanas = Math.ceil((totalDiasAnio + diaSemana) / 7);
 
   contenedor.innerHTML = `
@@ -500,7 +543,7 @@ function cargarTemporal() {
       <div class="card-subvalor">${totalSemanas - semanaActual} restantes (${(((totalSemanas - semanaActual) / totalSemanas) * 100).toFixed(1)}%)</div>
     </div>
     <div class="card">
-      <div class="card-titulo">📆 MES</div>
+      <div class="card-titulo">📆 Mes</div>
       <div class="card-valor">${MESES[mes]} - Día ${diaMes} de ${totalDiasMes}</div>
       <div class="barra-progreso">
         <div class="barra-fill" style="width: ${pctMes.toFixed(1)}%"></div>
@@ -519,7 +562,7 @@ function cargarTemporal() {
   `;
 }
 
-async function cargarFeriados() {
+async function cargarFeriados(signal) {
   const contenedor = document.getElementById('feriados-cards');
   const anio = new Date().getFullYear();
   const hoy = new Date();
@@ -531,7 +574,7 @@ async function cargarFeriados() {
   ];
 
   try {
-    const respuesta = await fetch(`${API_FERIADOS}${anio}`);
+    const respuesta = await fetchConTimeout(`${API_FERIADOS}${anio}`, signal);
     if (!respuesta.ok) throw new Error('Error al obtener feriados');
     const feriadosApi = await respuesta.json();
 
@@ -559,36 +602,57 @@ async function cargarFeriados() {
         return `
               <div class="card">
                   <div class="card-titulo">📅 ${dia} de ${mes}</div>
-                  <div class="card-valor">${f.nombre}</div>
-                  ${f.tipo !== 'evento' ? `<div class="card-subvalor">${f.tipo.charAt(0).toUpperCase() + f.tipo.slice(1)}</div>` : ''}
+                  <div class="card-valor">${escapeHtml(f.nombre)}</div>
+                  ${f.tipo !== 'evento' ? `<div class="card-subvalor">${escapeHtml(f.tipo.charAt(0).toUpperCase() + f.tipo.slice(1))}</div>` : ''}
               </div>
           `;
       })
       .join('');
   } catch (error) {
+    if (error.name === 'AbortError') return;
     console.error('Error feriados:', error);
     contenedor.innerHTML =
       '<div class="card card-error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los feriados</div></div>';
   }
 }
 
+let abortController = null;
+
 async function cargarTodos() {
+  if (abortController) abortController.abort();
+  abortController = new AbortController();
+  const { signal } = abortController;
+
   await Promise.all([
-    cargarFeriados(),
+    cargarFeriados(signal),
     cargarTemporal(),
-    cargarDolar(),
-    cargarClima(),
-    cargarTrenes(),
-    cargarArribos(),
+    cargarDolar(signal),
+    cargarClima(signal),
+    cargarTrenes(signal),
+    cargarArribos(signal),
   ]);
   actualizarTimestamp();
 }
 
+let intervaloReloj = null;
+let intervaloDatos = null;
+
 document.addEventListener('DOMContentLoaded', () => {
   actualizarReloj();
-  setInterval(actualizarReloj, 1000);
+  intervaloReloj = setInterval(actualizarReloj, 1000);
+
+  document.querySelectorAll('.seccion-toggle').forEach((btn) => {
+    const seccion = btn.closest('.seccion');
+    const id = seccion.id;
+    btn.addEventListener('click', () => toggleSeccion(id));
+  });
 
   cargarTodos();
+  intervaloDatos = setInterval(cargarTodos, 5 * 60 * 1000);
+});
 
-  setInterval(cargarTodos, 5 * 60 * 1000);
+window.addEventListener('beforeunload', () => {
+  if (intervaloReloj) clearInterval(intervaloReloj);
+  if (intervaloDatos) clearInterval(intervaloDatos);
+  if (abortController) abortController.abort();
 });
