@@ -517,8 +517,10 @@ function cargarTemporal() {
   const anio = ahora.getFullYear();
   const mes = ahora.getMonth();
   const diaMes = ahora.getDate();
+  const inicioAnio = new Date(anio, 0, 1);
+  const hoyMedianoche = new Date(anio, mes, diaMes);
   const diaDelAnio =
-    Math.round((ahora - new Date(anio, 0, 1)) / 86400000) + 1;
+    Math.round((hoyMedianoche - inicioAnio) / 86400000) + 1;
   const totalDiasAnio =
     (anio % 4 === 0 && anio % 100 !== 0) || anio % 400 === 0
       ? 366
@@ -527,8 +529,8 @@ function cargarTemporal() {
   const totalDiasMes = new Date(anio, mes + 1, 0).getDate();
   const diasRestantesMes = totalDiasMes - diaMes;
 
-  const pctAnio = (diaDelAnio / totalDiasAnio) * 100;
-  const pctMes = (diaMes / totalDiasMes) * 100;
+  const pctAnio = ((diaDelAnio - 1) / totalDiasAnio) * 100;
+  const pctMes = ((diaMes - 1) / totalDiasMes) * 100;
 
   const diaSemana = new Date(anio, 0, 1).getDay();
   const semanaActual =
