@@ -70,7 +70,7 @@ body {
 }
 
 .main {
-  max-width: 1100px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
 }
@@ -85,17 +85,79 @@ body {
   color: var(--section-title-color);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: 1rem;
-  padding: 0.4rem 0.75rem;
+  margin: 0;
+}
+
+.seccion-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   background: var(--section-title-bg);
+  border: none;
   border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.seccion-toggle:hover {
+  filter: brightness(0.95);
+}
+
+.flecha {
+  font-size: 0.7rem;
+  color: var(--section-title-color);
+  transition: transform 0.25s ease;
   display: inline-block;
+}
+
+.seccion.colapsada .flecha {
+  transform: rotate(-90deg);
+}
+
+.seccion-contenido {
+  overflow: hidden;
+  max-height: 2000px;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+  opacity: 1;
+}
+
+.seccion.colapsada .seccion-contenido {
+  max-height: 0;
+  opacity: 0;
 }
 
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.75rem;
+}
+
+.cards-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.5rem;
+}
+
+.cards-compact .card {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.cards-compact .card-titulo {
+  font-size: 0.7rem;
+  margin-bottom: 0.2rem;
+}
+
+.cards-compact .card-valor {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.cards-compact .card-subvalor {
+  font-size: 0.75rem;
+  margin-top: 0.15rem;
 }
 
 .card {

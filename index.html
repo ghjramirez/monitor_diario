@@ -21,47 +21,86 @@
 
     <main class="main">
       <section class="seccion" id="temporal">
-        <h2>Información Temporal</h2>
-        <div class="cards" id="temporal-cards">
-          <div class="card loading">
-            <div class="card-titulo">Cargando...</div>
+        <button class="seccion-toggle" onclick="toggleSeccion('temporal')">
+          <h2>Info Temporal</h2>
+          <span class="flecha">&#9662;</span>
+        </button>
+        <div class="seccion-contenido">
+          <div class="cards" id="temporal-cards">
+            <div class="card loading">
+              <div class="card-titulo">Cargando...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="seccion" id="feriados">
+        <button class="seccion-toggle" onclick="toggleSeccion('feriados')">
+          <h2>Feriados y Eventos</h2>
+          <span class="flecha">&#9662;</span>
+        </button>
+        <div class="seccion-contenido">
+          <div class="cards cards-compact" id="feriados-cards">
+            <div class="card loading">
+              <div class="card-titulo">Cargando...</div>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="seccion" id="dolar">
-        <h2>Cotización del Dólar</h2>
-        <div class="cards" id="dolar-cards">
-          <div class="card loading">
-            <div class="card-titulo">Cargando...</div>
+        <button class="seccion-toggle" onclick="toggleSeccion('dolar')">
+          <h2>Cotización dólar</h2>
+          <span class="flecha">&#9662;</span>
+        </button>
+        <div class="seccion-contenido">
+          <div class="cards" id="dolar-cards">
+            <div class="card loading">
+              <div class="card-titulo">Cargando...</div>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="seccion" id="clima">
-        <h2>Clima</h2>
-        <div class="cards" id="clima-cards">
-          <div class="card loading">
-            <div class="card-titulo">Cargando...</div>
+        <button class="seccion-toggle" onclick="toggleSeccion('clima')">
+          <h2>Clima</h2>
+          <span class="flecha">&#9662;</span>
+        </button>
+        <div class="seccion-contenido">
+          <div class="cards" id="clima-cards">
+            <div class="card loading">
+              <div class="card-titulo">Cargando...</div>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="seccion" id="trenes">
-        <h2>Línea Roca - Estado</h2>
-        <div class="cards" id="trenes-cards">
-          <div class="card loading">
-            <div class="card-titulo">Cargando...</div>
+        <button class="seccion-toggle" onclick="toggleSeccion('trenes')">
+          <h2>Línea Roca - Estado</h2>
+          <span class="flecha">&#9662;</span>
+        </button>
+        <div class="seccion-contenido">
+          <div class="cards" id="trenes-cards">
+            <div class="card loading">
+              <div class="card-titulo">Cargando...</div>
+            </div>
           </div>
+          <div class="alertas" id="trenes-alertas"></div>
         </div>
-        <div class="alertas" id="trenes-alertas"></div>
       </section>
 
       <section class="seccion" id="arribos">
-        <h2>Línea Roca - Horarios</h2>
-        <div id="arribos-container">
-          <div class="card loading">
-            <div class="card-titulo">Cargando...</div>
+        <button class="seccion-toggle" onclick="toggleSeccion('arribos')">
+          <h2>Línea Roca - Horarios</h2>
+          <span class="flecha">&#9662;</span>
+        </button>
+        <div class="seccion-contenido">
+          <div id="arribos-container">
+            <div class="card loading">
+              <div class="card-titulo">Cargando...</div>
+            </div>
           </div>
         </div>
       </section>
@@ -71,7 +110,10 @@
       <p>
         Última actualización: <span id="ultima-actualizacion">-</span>
       </p>
-      <p>Fuentes: dolarapi.com | wttr.in | SOFSE Trenes</p>
+      <p>
+        Fuentes: dolarapi.com | Open-Meteo | argentinadatos.com |
+        SOFSE Trenes
+      </p>
     </footer>
 
     <script src="js/app.js"></script>

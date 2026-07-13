@@ -1,6 +1,14 @@
 const API_DOLAR = 'https://dolarapi.com/v1/dolares';
-const API_CLIMA_CABA = 'https://wttr.in/Buenos+Aires?format=j1';
-const API_CLIMA_QUILMES = 'https://wttr.in/Quilmes?format=j1';
+const API_CLIMA_BASE = 'https://api.open-meteo.com/v1/forecast';
+const API_CLIMA_PARAMS =
+  '&current=temperature_2m,relative_humidity_2m,weather_code,apparent_temperature' +
+  '&daily=precipitation_probability_max,temperature_2m_max,temperature_2m_min' +
+  '&forecast_days=2&timezone=America%2FArgentina%2FBuenos_Aires';
+const API_CLIMA_CABA =
+  `${API_CLIMA_BASE}?latitude=-34.6037&longitude=-58.3816${API_CLIMA_PARAMS}`;
+const API_CLIMA_QUILMES =
+  `${API_CLIMA_BASE}?latitude=-34.7233&longitude=-58.2681${API_CLIMA_PARAMS}`;
+const API_FERIADOS = 'https://api.argentinadatos.com/v1/feriados/';
 const API_TRENES_RAMALES =
   'https://ariedro.dev/api-trenes/infraestructura/ramales?idGerencia=11';
 const API_TRENES_ARRIBOS_CONST =
@@ -35,6 +43,59 @@ const MESES = [
   'Noviembre',
   'Diciembre',
 ];
+
+function nthWeekday(anio, mes, weekday, n) {
+  const primerDia = new Date(anio, mes, 1);
+  const diff = (weekday - primerDia.getDay() + 7) % 7;
+  return new Date(anio, mes, 1 + diff + (n - 1) * 7);
+}
+
+function ultimoWeekday(anio, mes, weekday) {
+  const ultimoDia = new Date(anio, mes + 1, 0);
+  const diff = (ultimoDia.getDay() - weekday + 7) % 7;
+  return new Date(anio, mes, ultimoDia.getDate() - diff);
+}
+
+const EVENTOS = [
+  { mes: 1, dia: 14, nombre: 'Día del Amor' },
+  { mes: 2, dia: 14, nombre: 'San Valentín' },
+  { mes: 3, dia: 31, nombre: 'Día del Malvinero' },
+  { mes: 7, dia: 20, nombre: 'Día del Amigo' },
+  { mes: 9, dia: 21, nombre: 'Día del Estudiante' },
+  { mes: 10, dia: 31, nombre: 'Halloween' },
+  { mes: 11, dia: 1, nombre: 'Día de los Fieles Difuntos' },
+  { mes: 12, dia: 24, nombre: 'Nochebuena' },
+  { mes: 12, dia: 31, nombre: 'Fin de Año' },
+];
+
+function calcularDiasFijos(anio) {
+  return EVENTOS.map((e) => ({
+    fecha: new Date(anio, e.mes - 1, e.dia),
+    nombre: e.nombre,
+    tipo: 'evento',
+  }));
+}
+
+function calcularDiasRelativos(anio) {
+  const eventos = [
+    { calcular: (y) => ultimoWeekday(y, 5, 0), nombre: 'Día del Padre' },
+    { calcular: (y) => nthWeekday(y, 10, 0, 3), nombre: 'Día de la Madre' },
+    { calcular: (y) => {
+      const primerAgosto = new Date(y, 7, 1);
+      const diff = (6 - primerAgosto.getDay() + 7) % 7;
+      return new Date(y, 7, 1 + diff + 2 * 7);
+    }, nombre: 'Día del Niño' },
+  ];
+  return eventos.map((e) => ({
+    fecha: e.calcular(anio),
+    nombre: e.nombre,
+    tipo: 'evento',
+  }));
+}
+
+function toggleSeccion(id) {
+  document.getElementById(id).classList.toggle('colapsada');
+}
 
 function actualizarReloj() {
   const ahora = new Date();
@@ -103,25 +164,38 @@ async function cargarDolar() {
 async function cargarClima() {
   const contenedor = document.getElementById('clima-cards');
 
-  const weatherMap = {
-    113: '☀️ Soleado',
-    116: '⛅ Parc. nublado',
-    119: '☁️ Nublado',
-    122: '☁️ Muy nublado',
-    143: '🌫️ Niebla',
-    176: '🌦️ Lluvia ligera',
-    200: '⛈️ Tormenta',
-    296: '🌧️ Lluvia',
-    302: '🌧️ Lluvia fuerte',
-    389: '⛈️ Tormenta fuerte',
+  const wmoCodes = {
+    0: '☀️ Soleado',
+    1: '☀️ Mayormente soleado',
+    2: '⛅ Parc. nublado',
+    3: '☁️ Nublado',
+    45: '🌫️ Niebla',
+    48: '🌫️ Niebla escarchada',
+    51: '🌦️ Lluvia ligera',
+    53: '🌦️ Lluvia moderada',
+    55: '🌧️ Lluvia intensa',
+    61: '🌧️ Lluvia',
+    63: '🌧️ Lluvia fuerte',
+    65: '🌧️ Lluvia extrema',
+    71: '🌨️ Nieve ligera',
+    73: '🌨️ Nieve',
+    75: '❄️ Nieve intensa',
+    80: '🌦️ Chubasco ligero',
+    81: '🌧️ Chubasco',
+    82: '🌧️ Chubasco fuerte',
+    95: '⛈️ Tormenta',
+    96: '⛈️ Tormenta con granizo',
+    99: '⛈️ Tormenta fuerte con granizo',
   };
 
   function renderClima(nombre, datos) {
-    const actual = datos.current_condition[0];
-    const hoy = datos.weather[0];
-    const codigo = actual.weatherCode;
-    const desc =
-      weatherMap[codigo] || '🌡️ ' + actual.weatherDesc[0].value;
+    const actual = datos.current;
+    const codigo = actual.weather_code;
+    const desc = wmoCodes[codigo] || `🌡️ Código ${codigo}`;
+    const probHoy = datos.daily.precipitation_probability_max[0];
+    const probManana = datos.daily.precipitation_probability_max[1];
+    const maxHoy = datos.daily.temperature_2m_max[0];
+    const minHoy = datos.daily.temperature_2m_min[0];
 
     return `
             <div class="clima-grupo">
@@ -129,8 +203,8 @@ async function cargarClima() {
                 <div class="cards">
                     <div class="card">
                         <div class="card-titulo">Temperatura</div>
-                        <div class="card-valor">${actual.temp_C}°C</div>
-                        <div class="card-subvalor">Sensación: ${actual.FeelsLikeC}°C</div>
+                        <div class="card-valor">${actual.temperature_2m}°C</div>
+                        <div class="card-subvalor">Sensación: ${actual.apparent_temperature}°C</div>
                     </div>
                     <div class="card">
                         <div class="card-titulo">Condición</div>
@@ -138,15 +212,16 @@ async function cargarClima() {
                     </div>
                     <div class="card">
                         <div class="card-titulo">Máx / Mín</div>
-                        <div class="card-valor">${hoy.maxtempC}° / ${hoy.mintempC}°</div>
+                        <div class="card-valor">${maxHoy}° / ${minHoy}°</div>
                     </div>
                     <div class="card">
                         <div class="card-titulo">Humedad</div>
-                        <div class="card-valor">${actual.humidity}%</div>
+                        <div class="card-valor">${actual.relative_humidity_2m}%</div>
                     </div>
                     <div class="card">
-                        <div class="card-titulo">Viento</div>
-                        <div class="card-valor">${actual.windspeedKmph} km/h</div>
+                        <div class="card-titulo">🌧️ Prob. lluvia hoy</div>
+                        <div class="card-valor">${probHoy}%</div>
+                        <div class="card-subvalor">Mañana: ${probManana}%</div>
                     </div>
                 </div>
             </div>
@@ -407,22 +482,14 @@ function cargarTemporal() {
 
   contenedor.innerHTML = `
     <div class="card">
-      <div class="card-titulo">📊 Semana</div>
-      <div class="card-valor">Semana ${semanaActual} de ${totalSemanas}</div>
-      <div class="card-subvalor">${totalSemanas - semanaActual} restantes (${(((totalSemanas - semanaActual) / totalSemanas) * 100).toFixed(1)}%)</div>
-    </div>
-    <div class="card">
       <div class="card-titulo">🗓️ Día</div>
       <div class="card-valor">Día ${diaDelAnio} de ${totalDiasAnio}</div>
       <div class="card-subvalor">${diasRestantesAnio} restantes (${(100 - pctAnio).toFixed(1)}%)</div>
     </div>
     <div class="card">
-      <div class="card-titulo">🌎 Año</div>
-      <div class="card-valor">${anio} - ${totalDiasAnio === 366 ? 'Bisiesto' : 'No bisiesto'}</div>
-      <div class="barra-progreso">
-        <div class="barra-fill" style="width: ${pctAnio.toFixed(1)}%"></div>
-      </div>
-      <div class="card-subvalor">Progreso del año: ${pctAnio.toFixed(1)}%</div>
+      <div class="card-titulo">📊 Semana</div>
+      <div class="card-valor">Semana ${semanaActual} de ${totalSemanas}</div>
+      <div class="card-subvalor">${totalSemanas - semanaActual} restantes (${(((totalSemanas - semanaActual) / totalSemanas) * 100).toFixed(1)}%)</div>
     </div>
     <div class="card">
       <div class="card-titulo">📆 MES</div>
@@ -433,11 +500,75 @@ function cargarTemporal() {
       <div class="card-subvalor">Progreso del mes: ${pctMes.toFixed(1)}%</div>
       <div class="card-subvalor">${diasRestantesMes} restantes</div>
     </div>
+    <div class="card">
+      <div class="card-titulo">🌎 Año</div>
+      <div class="card-valor">${anio} - ${totalDiasAnio === 366 ? 'Bisiesto' : 'No bisiesto'}</div>
+      <div class="barra-progreso">
+        <div class="barra-fill" style="width: ${pctAnio.toFixed(1)}%"></div>
+      </div>
+      <div class="card-subvalor">Progreso del año: ${pctAnio.toFixed(1)}%</div>
+    </div>
   `;
+}
+
+function cargarFeriados() {
+  const contenedor = document.getElementById('feriados-cards');
+  const anio = new Date().getFullYear();
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  const eventosLocales = [
+    ...calcularDiasFijos(anio),
+    ...calcularDiasRelativos(anio),
+  ];
+
+  fetch(`${API_FERIADOS}${anio}`)
+    .then((r) => {
+      if (!r.ok) throw new Error('Error al obtener feriados');
+      return r.json();
+    })
+    .then((feriadosApi) => {
+      const feriadosNormalizados = feriadosApi.map((f) => ({
+        fecha: new Date(f.fecha + 'T00:00:00'),
+        nombre: f.nombre,
+        tipo: f.tipo,
+      }));
+
+      const todos = [...feriadosNormalizados, ...eventosLocales]
+        .filter((f) => f.fecha >= hoy)
+        .sort((a, b) => a.fecha - b.fecha)
+        .slice(0, 4);
+
+      if (todos.length === 0) {
+        contenedor.innerHTML =
+          '<div class="card"><div class="card-titulo">Sin datos</div><div class="card-valor">No hay feriados próximos</div></div>';
+        return;
+      }
+
+      contenedor.innerHTML = todos
+        .map((f) => {
+          const dia = String(f.fecha.getDate()).padStart(2, '0');
+          const mes = MESES[f.fecha.getMonth()];
+          return `
+                <div class="card">
+                    <div class="card-titulo">📅 ${dia} de ${mes}</div>
+                    <div class="card-valor">${f.nombre}</div>
+                    ${f.tipo !== 'evento' ? `<div class="card-subvalor">${f.tipo.charAt(0).toUpperCase() + f.tipo.slice(1)}</div>` : ''}
+                </div>
+            `;
+        })
+        .join('');
+    })
+    .catch((error) => {
+      console.error('Error feriados:', error);
+      contenedor.innerHTML =
+        '<div class="card error"><div class="card-titulo">Error</div><div class="card-valor">No se pudieron cargar los feriados</div></div>';
+    });
 }
 
 async function cargarTodos() {
   await Promise.all([
+    cargarFeriados(),
     cargarTemporal(),
     cargarDolar(),
     cargarClima(),
