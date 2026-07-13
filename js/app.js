@@ -134,19 +134,15 @@ function calcularDiasFijos(anio) {
 function calcularDiasRelativos(anio) {
   const eventos = [
     {
-      calcular: (y) => ultimoWeekday(y, 5, 0),
+      calcular: (y) => nthWeekday(y, 5, 0, 3),
       nombre: 'Día del Padre',
     },
     {
-      calcular: (y) => nthWeekday(y, 10, 0, 3),
+      calcular: (y) => nthWeekday(y, 9, 0, 3),
       nombre: 'Día de la Madre',
     },
     {
-      calcular: (y) => {
-        const primerAgosto = new Date(y, 7, 1);
-        const diff = (6 - primerAgosto.getDay() + 7) % 7;
-        return new Date(y, 7, 1 + diff + 2 * 7);
-      },
+      calcular: (y) => nthWeekday(y, 7, 0, 3),
       nombre: 'Día del Niño',
     },
   ];
@@ -161,17 +157,25 @@ function toggleSeccion(id) {
   const seccion = document.getElementById(id);
   const contenido = seccion.querySelector('.seccion-contenido');
   const boton = seccion.querySelector('.seccion-toggle');
-  const colapsada = seccion.classList.toggle('colapsada');
-  boton.setAttribute('aria-expanded', String(!colapsada));
-  if (!colapsada) {
-    contenido.style.maxHeight = contenido.scrollHeight + 'px';
+  const colapsada = seccion.classList.contains('colapsada');
+
+  if (colapsada) {
+    const altura = contenido.scrollHeight;
+    seccion.classList.remove('colapsada');
+    contenido.style.maxHeight = altura + 'px';
     contenido.addEventListener(
       'transitionend',
-      () => {
-        contenido.style.maxHeight = '';
-      },
+      () => { contenido.style.maxHeight = ''; },
       { once: true },
     );
+    boton.setAttribute('aria-expanded', 'true');
+  } else {
+    const altura = contenido.scrollHeight;
+    seccion.classList.add('colapsada');
+    requestAnimationFrame(() => {
+      contenido.style.maxHeight = '0px';
+    });
+    boton.setAttribute('aria-expanded', 'false');
   }
 }
 
@@ -452,14 +456,14 @@ function renderTablaArribos(titulo, arribos, esSalida) {
 }
 
 function filtrarArribos(datos, sentido) {
-  return (datos.results || [])
+  const results = Array.isArray(datos.results) ? datos.results : [];
+  return results
     .filter((a) => {
-      const nombre =
-        a.servicio && a.servicio.ramal && a.servicio.ramal.nombre;
+      if (!a || !a.servicio || !a.servicio.ramal) return false;
+      const nombre = a.servicio.ramal.nombre;
       const matchRamal = RAMALES_FILTRADOS.includes(nombre);
       const matchSentido =
-        sentido === undefined ||
-        (a.servicio && a.servicio.sentido === sentido);
+        sentido === undefined || a.servicio.sentido === sentido;
       return matchRamal && matchSentido;
     })
     .slice(0, 3);
@@ -623,14 +627,19 @@ async function cargarTodos() {
   abortController = new AbortController();
   const { signal } = abortController;
 
-  await Promise.all([
-    cargarFeriados(signal),
-    cargarTemporal(),
-    cargarDolar(signal),
-    cargarClima(signal),
-    cargarTrenes(signal),
-    cargarArribos(signal),
-  ]);
+  try {
+    await Promise.all([
+      cargarFeriados(signal),
+      cargarDolar(signal),
+      cargarClima(signal),
+      cargarTrenes(signal),
+      cargarArribos(signal),
+    ]);
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      console.error('Error en cargarTodos:', error);
+    }
+  }
   actualizarTimestamp();
 }
 
@@ -647,6 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => toggleSeccion(id));
   });
 
+  cargarTemporal();
   cargarTodos();
   intervaloDatos = setInterval(cargarTodos, 5 * 60 * 1000);
 });
@@ -654,5 +664,4 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('beforeunload', () => {
   if (intervaloReloj) clearInterval(intervaloReloj);
   if (intervaloDatos) clearInterval(intervaloDatos);
-  if (abortController) abortController.abort();
 });
