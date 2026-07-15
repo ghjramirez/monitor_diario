@@ -215,6 +215,15 @@ function formatearUSD(valor) {
   }).format(num);
 }
 
+function formatearNumero(valor) {
+  const num = Number(valor);
+  if (isNaN(num)) return '-';
+  return new Intl.NumberFormat('es-AR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(num);
+}
+
 async function cargarDolar(signal) {
   const contenedor = document.getElementById('dolar-cards');
   try {
@@ -561,6 +570,120 @@ function actualizarConversor() {
   }
 }
 
+const HERRAMIENTAS = [
+  { id: 'calculadora', nombre: 'Calculadora %', icono: '%' },
+];
+
+let toolboxAbierta = false;
+let herramientaActiva = 'calculadora';
+
+function toggleToolbox(abrir) {
+  const abriendo = abrir !== undefined ? abrir : !toolboxAbierta;
+  toolboxAbierta = abriendo;
+  document.getElementById('toolbox').classList.toggle('abierto', abriendo);
+  document.getElementById('toolbox-overlay').classList.toggle('abierto', abriendo);
+  document.body.classList.toggle('toolbox-abierto', abriendo);
+}
+
+function generarMenuToolbox() {
+  const menu = document.getElementById('toolbox-menu');
+  menu.innerHTML = HERRAMIENTAS.map(
+    (h, i) => `
+    <button class="toolbox-menu-item${i === 0 ? ' active' : ''}" data-herramienta="${h.id}">
+      <span class="toolbox-menu-icon">${h.icono}</span>
+      ${h.nombre}
+    </button>
+  `,
+  ).join('');
+}
+
+function seleccionarHerramienta(id) {
+  herramientaActiva = id;
+  document.querySelectorAll('.toolbox-menu-item').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.herramienta === id);
+  });
+  if (id === 'calculadora') renderizarCalculadora();
+}
+
+function renderizarCalculadora() {
+  const container = document.getElementById('toolbox-content');
+  container.innerHTML = `
+    <div class="herramienta">
+      <div class="herramienta-campo">
+        <label for="calc-modo">Tipo de cálculo</label>
+        <select id="calc-modo">
+          <option value="porcentaje">¿X% de Y?</option>
+          <option value="descuento">Descuento</option>
+          <option value="aumento">Aumento</option>
+        </select>
+      </div>
+      <div class="herramienta-campo" id="calc-campo1">
+        <label for="calc-valor1" id="calc-label1">Porcentaje (%)</label>
+        <input type="number" id="calc-valor1" placeholder="0" min="0" step="any">
+      </div>
+      <div class="herramienta-campo" id="calc-campo2">
+        <label for="calc-valor2" id="calc-label2">Valor</label>
+        <input type="number" id="calc-valor2" placeholder="0" min="0" step="any">
+      </div>
+      <div class="herramienta-divisor"></div>
+      <div class="herramienta-resultado">
+        <div class="herramienta-resultado-label">Resultado</div>
+        <div class="herramienta-resultado-valor" id="calc-resultado">—</div>
+        <div class="herramienta-resultado-detalle" id="calc-detalle"></div>
+      </div>
+    </div>
+  `;
+  document.getElementById('calc-modo').addEventListener('change', actualizarCalculadora);
+  document.getElementById('calc-valor1').addEventListener('input', actualizarCalculadora);
+  document.getElementById('calc-valor2').addEventListener('input', actualizarCalculadora);
+  actualizarCalculadora();
+}
+
+function actualizarCalculadora() {
+  const modo = document.getElementById('calc-modo').value;
+  const v1 = parseFloat(document.getElementById('calc-valor1').value);
+  const v2 = parseFloat(document.getElementById('calc-valor2').value);
+  const resultadoEl = document.getElementById('calc-resultado');
+  const detalleEl = document.getElementById('calc-detalle');
+  const label1 = document.getElementById('calc-label1');
+  const label2 = document.getElementById('calc-label2');
+
+  label1.textContent = 'Porcentaje (%)';
+
+  switch (modo) {
+    case 'porcentaje':
+      label2.textContent = 'Valor';
+      if (isNaN(v1) || isNaN(v2) || v1 < 0 || v2 < 0) {
+        resultadoEl.textContent = '—';
+        detalleEl.textContent = '';
+        return;
+      }
+      resultadoEl.textContent = formatearNumero((v1 / 100) * v2);
+      detalleEl.textContent = `${formatearNumero(v1)}% de ${formatearNumero(v2)}`;
+      break;
+    case 'descuento':
+      label2.textContent = 'Precio original';
+      if (isNaN(v1) || isNaN(v2) || v1 < 0 || v2 < 0) {
+        resultadoEl.textContent = '—';
+        detalleEl.textContent = '';
+        return;
+      }
+      resultadoEl.textContent = formatearNumero(v2 * (1 - v1 / 100));
+      detalleEl.textContent = `Ahorrás: ${formatearNumero(v2 * (v1 / 100))}`;
+      break;
+    case 'aumento':
+      label2.textContent = 'Precio original';
+      if (isNaN(v1) || isNaN(v2) || v1 < 0 || v2 < 0) {
+        resultadoEl.textContent = '—';
+        detalleEl.textContent = '';
+        return;
+      }
+      resultadoEl.textContent = formatearNumero(v2 * (1 + v1 / 100));
+      detalleEl.textContent = `Incremento: ${formatearNumero(v2 * (v1 / 100))}`;
+      break;
+  }
+}
+
 function cargarTemporal() {
   const contenedor = document.getElementById('temporal-cards');
   const ahora = new Date();
@@ -717,6 +840,24 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.classList.add('active');
     actualizarConversor();
   });
+
+  generarMenuToolbox();
+
+  document.getElementById('toolbox-btn').addEventListener('click', () => toggleToolbox(true));
+  document.getElementById('toolbox-close').addEventListener('click', () => toggleToolbox(false));
+  document.getElementById('toolbox-overlay').addEventListener('click', () => toggleToolbox(false));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && toolboxAbierta) toggleToolbox(false);
+  });
+
+  document.getElementById('toolbox-menu').addEventListener('click', (e) => {
+    const item = e.target.closest('.toolbox-menu-item');
+    if (!item) return;
+    seleccionarHerramienta(item.dataset.herramienta);
+  });
+
+  seleccionarHerramienta('calculadora');
 
   cargarTemporal();
   cargarTodos();
