@@ -7,20 +7,23 @@
       content="width=device-width, initial-scale=1.0"
     />
     <title>Monitor Diario</title>
-    <meta name="description" content="Monitor Diario - Información útil: dólar, clima, trenes y más" />
+    <meta
+      name="description"
+      content="Monitor Diario - Información útil: dólar, clima, trenes y más"
+    />
     <meta name="theme-color" content="#e1d5c4" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/style.css" />
-    <link
-      rel="icon"
-      href="./assets/info.png"
-      type="image/png"
-    />
+    <link rel="icon" href="./assets/info.png" type="image/png" />
   </head>
   <body>
     <header class="header">
@@ -29,7 +32,11 @@
 
     <main class="main">
       <section class="seccion" id="temporal">
-        <button class="seccion-toggle" aria-expanded="true" aria-controls="temporal-contenido">
+        <button
+          class="seccion-toggle"
+          aria-expanded="true"
+          aria-controls="temporal-contenido"
+        >
           <h2>Info Temporal</h2>
           <span class="flecha">▾</span>
         </button>
@@ -43,7 +50,11 @@
       </section>
 
       <section class="seccion" id="feriados">
-        <button class="seccion-toggle" aria-expanded="true" aria-controls="feriados-contenido">
+        <button
+          class="seccion-toggle"
+          aria-expanded="true"
+          aria-controls="feriados-contenido"
+        >
           <h2>Feriados y Eventos</h2>
           <span class="flecha">▾</span>
         </button>
@@ -57,7 +68,11 @@
       </section>
 
       <section class="seccion" id="dolar">
-        <button class="seccion-toggle" aria-expanded="true" aria-controls="dolar-contenido">
+        <button
+          class="seccion-toggle"
+          aria-expanded="true"
+          aria-controls="dolar-contenido"
+        >
           <h2>Cotización dólar</h2>
           <span class="flecha">▾</span>
         </button>
@@ -67,11 +82,62 @@
               <div class="card-titulo">Cargando...</div>
             </div>
           </div>
+          <div class="conversor" id="dolar-conversor">
+            <div class="conversor-fila">
+              <div class="conversor-campo">
+                <label for="conv-tipo">Tipo de dólar</label>
+                <select id="conv-tipo">
+                  <option value="oficial">Dólar Oficial 🟢</option>
+                  <option value="blue">Dólar Blue 🔵</option>
+                  <option value="tarjeta">Dólar Tarjeta 💳</option>
+                </select>
+              </div>
+              <div class="conversor-campo">
+                <label>Dirección</label>
+                <div class="conversor-direccion" id="conv-direccion">
+                  <button
+                    class="conv-btn active"
+                    data-direction="usd-ars"
+                  >
+                    USD → ARS
+                  </button>
+                  <button class="conv-btn" data-direction="ars-usd">
+                    ARS → USD
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="conversor-fila">
+              <div class="conversor-campo">
+                <label for="conv-monto">Monto</label>
+                <input
+                  type="number"
+                  id="conv-monto"
+                  placeholder="Ingresá el monto"
+                  min="0"
+                  step="any"
+                />
+              </div>
+              <div class="conversor-campo">
+                <label>Resultado</label>
+                <div class="conversor-valor" id="conv-resultado">
+                  —
+                </div>
+                <div class="conversor-tc" id="conv-tc">
+                  Cargando...
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       <section class="seccion" id="clima">
-        <button class="seccion-toggle" aria-expanded="true" aria-controls="clima-contenido">
+        <button
+          class="seccion-toggle"
+          aria-expanded="true"
+          aria-controls="clima-contenido"
+        >
           <h2>Clima</h2>
           <span class="flecha">▾</span>
         </button>
@@ -85,7 +151,11 @@
       </section>
 
       <section class="seccion" id="trenes">
-        <button class="seccion-toggle" aria-expanded="true" aria-controls="trenes-contenido">
+        <button
+          class="seccion-toggle"
+          aria-expanded="true"
+          aria-controls="trenes-contenido"
+        >
           <h2>Línea Roca - Estado</h2>
           <span class="flecha">▾</span>
         </button>
@@ -100,7 +170,11 @@
       </section>
 
       <section class="seccion" id="arribos">
-        <button class="seccion-toggle" aria-expanded="true" aria-controls="arribos-contenido">
+        <button
+          class="seccion-toggle"
+          aria-expanded="true"
+          aria-controls="arribos-contenido"
+        >
           <h2>Línea Roca - Horarios</h2>
           <span class="flecha">▾</span>
         </button>

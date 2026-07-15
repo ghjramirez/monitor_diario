@@ -25,6 +25,8 @@ const NOMBRES_DOLAR = {
   tarjeta: 'Dólar Tarjeta',
 };
 
+let datosDolar = [];
+
 const WMO_CODES = {
   0: '☀️ Despejado',
   1: '☀️ Mayormente despejado',
@@ -202,6 +204,17 @@ function formatearMoneda(valor) {
   }).format(num);
 }
 
+function formatearUSD(valor) {
+  const num = Number(valor);
+  if (isNaN(num)) return 'U$D -';
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(num);
+}
+
 async function cargarDolar(signal) {
   const contenedor = document.getElementById('dolar-cards');
   try {
@@ -231,6 +244,9 @@ async function cargarDolar(signal) {
         `,
       )
       .join('');
+
+    datosDolar = filtrados;
+    actualizarConversor();
   } catch (error) {
     if (error.name === 'AbortError') return;
     console.error('Error dólar:', error);
@@ -511,6 +527,40 @@ function actualizarTimestamp() {
     timestamp;
 }
 
+function actualizarConversor() {
+  const tipo = document.getElementById('conv-tipo').value;
+  const dirBtn = document.querySelector('#conv-direccion .conv-btn.active');
+  const direccion = dirBtn ? dirBtn.dataset.direction : 'usd-ars';
+  const montoInput = document.getElementById('conv-monto');
+  const monto = parseFloat(montoInput.value);
+  const resultadoEl = document.getElementById('conv-resultado');
+  const tcEl = document.getElementById('conv-tc');
+
+  const dolar = datosDolar.find((d) => d.casa === tipo);
+
+  if (!dolar) {
+    resultadoEl.textContent = '—';
+    tcEl.textContent = 'Cargando...';
+    return;
+  }
+
+  const esUsdAArs = direccion === 'usd-ars';
+  const tasa = esUsdAArs ? dolar.compra : dolar.venta;
+  const etiquetaTC = esUsdAArs ? 'Compra' : 'Venta';
+  tcEl.textContent = `TC ${etiquetaTC}: ${formatearMoneda(tasa)}`;
+
+  if (isNaN(monto) || monto <= 0) {
+    resultadoEl.textContent = '—';
+    return;
+  }
+
+  if (esUsdAArs) {
+    resultadoEl.textContent = formatearMoneda(monto * tasa);
+  } else {
+    resultadoEl.textContent = formatearUSD(monto / tasa);
+  }
+}
+
 function cargarTemporal() {
   const contenedor = document.getElementById('temporal-cards');
   const ahora = new Date();
@@ -656,6 +706,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const seccion = btn.closest('.seccion');
     const id = seccion.id;
     btn.addEventListener('click', () => toggleSeccion(id));
+  });
+
+  document.getElementById('conv-tipo').addEventListener('change', actualizarConversor);
+  document.getElementById('conv-monto').addEventListener('input', actualizarConversor);
+  document.getElementById('conv-direccion').addEventListener('click', (e) => {
+    const btn = e.target.closest('.conv-btn');
+    if (!btn) return;
+    document.querySelectorAll('#conv-direccion .conv-btn').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    actualizarConversor();
   });
 
   cargarTemporal();
