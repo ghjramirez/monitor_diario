@@ -24,10 +24,11 @@
   --text-xl:     1.5rem;    /* 24px */
 
   /* Font weights */
-  --weight-normal: 400;
-  --weight-medium: 600;
-  --weight-bold:   700;
-  --weight-black:  800;
+  --weight-normal:   400;
+  --weight-semibold: 500;
+  --weight-medium:  600;
+  --weight-bold:    700;
+  --weight-black:   800;
 
   /* ── Paleta de colores ───────────────────────── */
 
@@ -416,7 +417,7 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   background: var(--bg-primary);
   color: var(--text-primary);
   outline: none;
@@ -436,7 +437,7 @@ body {
 
 .conversor-direccion {
   display: flex;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .conv-btn {
@@ -526,12 +527,12 @@ body {
 
 .arribo-urgente td {
   color: var(--success);
-  font-weight: 600;
+  font-weight: var(--weight-medium);
 }
 
 .arribo-proximo td {
   color: var(--warning);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
 }
 
 .arribo-cancelado {
@@ -709,7 +710,7 @@ body.toolbox-abierto .toolbox-btn {
   padding: var(--space-1);
   border-bottom: 1px solid var(--border);
   display: flex;
-  gap: 0.25rem;
+  gap: var(--space-1);
   flex-shrink: 0;
 }
 
@@ -773,7 +774,7 @@ body.toolbox-abierto .toolbox-btn {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   background: var(--bg-primary);
   color: var(--text-primary);
   outline: none;
@@ -822,16 +823,16 @@ body.toolbox-abierto .toolbox-btn {
 
 .seccion-meta {
   margin-bottom: var(--space-2);
+  position: relative;
 }
 
 .meta-banner {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-2);
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
   transition: background 0.3s ease, border-color 0.3s ease;
-  min-height: 76px;
   border-left: 4px solid var(--danger);
   background: var(--danger-light);
 }
@@ -841,28 +842,66 @@ body.toolbox-abierto .toolbox-btn {
   background: var(--success-light);
 }
 
+.meta-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .meta-icono {
-  font-size: var(--text-xl);
+  font-size: 2rem;
   line-height: 1;
 }
 
-.meta-info {
-  flex: 1;
+.meta-monto-group {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.meta-fila {
-  font-size: var(--text-sm);
-  color: var(--text-primary);
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-1);
 }
 
 .meta-monto {
+  font-size: 2.25rem;
+  font-weight: var(--weight-black);
+  color: var(--text-primary);
   cursor: pointer;
+  border-bottom: 2px dashed var(--text-secondary);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.meta-monto-currency {
+  font-size: var(--text-lg);
   font-weight: var(--weight-bold);
-  border-bottom: 1px dashed var(--text-secondary);
-  padding: 0 2px;
+  color: var(--text-secondary);
+}
+
+.meta-monto-label {
+  flex: 0 0 100%;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.meta-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.meta-texto {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+}
+
+.meta-botones {
+  display: flex;
+  gap: var(--space-1);
+  flex-shrink: 0;
 }
 
 .meta-monto-input {
@@ -897,6 +936,203 @@ body.toolbox-abierto .toolbox-btn {
 .meta-btn-rectificar {
   background: var(--warning);
   color: #fff;
+}
+
+.meta-detalles-btn {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.meta-detalles-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.meta-meses {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.cal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 399;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.cal-overlay.abierto {
+  display: block;
+}
+
+.cal-popover {
+  display: none;
+  position: fixed;
+  z-index: 400;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+}
+
+.cal-popover.abierto {
+  display: block;
+}
+
+.cal-popover-inner {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  max-width: 280px;
+}
+
+.cal-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
+  background: var(--section-title-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.cal-popover-titulo {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--section-title-color);
+}
+
+.cal-popover-close {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.cal-popover-close:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.cal-popover-cuerpo {
+  padding: var(--space-1);
+}
+
+.cal-popover-leyenda {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.cal-leyenda-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.cal-leyenda-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cal-leyenda-verde {
+  background: var(--success);
+}
+
+.cal-leyenda-rojo {
+  background: var(--danger);
+}
+
+.mini-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.cal-header {
+  text-align: center;
+  font-size: 8px;
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 0;
+}
+
+.cal-dia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 22px;
+  font-size: 10px;
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  font-family: inherit;
+  padding: 0;
+  background: transparent;
+}
+
+.cal-dia:hover {
+  border-color: var(--accent);
+  background: var(--bg-primary);
+}
+
+.cal-dia.cal-completado {
+  background: var(--success-light);
+  border-color: var(--success);
+  color: var(--success);
+  font-weight: var(--weight-bold);
+}
+
+.cal-dia.cal-hoy-pendiente {
+  background: var(--danger-light);
+  border-color: var(--danger);
+  color: var(--danger);
+  font-weight: var(--weight-bold);
+}
+
+.cal-dia.cal-hoy {
+  font-weight: var(--weight-black);
+}
+
+.cal-blank {
+  background: transparent;
+  border: none;
+  cursor: default;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -75,6 +75,29 @@ const MESES = [
   'Diciembre',
 ];
 
+const STORAGE_KEY = 'monitor-ahorro';
+
+function cargarDatosAhorro() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return { monto: 5, dias: {} };
+  try { return JSON.parse(raw); }
+  catch { return { monto: 5, dias: {} }; }
+}
+
+function guardarDatosAhorro(datos) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
+}
+
+function fechaStr(d) {
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+function mesStr(anio, mes) {
+  return anio + '-' + String(mes + 1).padStart(2, '0');
+}
+
 function escapeHtml(str) {
   if (str == null) return '';
   return String(str)
@@ -819,51 +842,192 @@ async function cargarTodos() {
 }
 
 function renderizarMetaAhorro() {
-  const icono = document.getElementById('meta-icono');
-  const btn = document.getElementById('meta-btn');
+  const datos = cargarDatosAhorro();
+  const hoy = new Date();
+  const hoyKey = fechaStr(hoy);
+
   const banner = document.getElementById('meta-banner');
-  const fila = document.getElementById('meta-fila');
+  const icono = document.getElementById('meta-icono');
+  const textoEl = document.getElementById('meta-texto');
+  const btn = document.getElementById('meta-btn');
+
+  let completada = !!datos.dias[hoyKey];
+  let ultimoToggle = 0;
+  const MIN_TOGGLE_INTERVAL = 1500;
 
   function obtenerMonto() {
     const el = document.getElementById('meta-monto');
-    return el ? el.textContent : '5';
+    return el ? el.textContent : String(datos.monto);
+  }
+
+  function totalMes(anio, mes) {
+    const prefix = mesStr(anio, mes);
+    const count = Object.keys(datos.dias).filter(
+      (k) => k.startsWith(prefix) && datos.dias[k],
+    ).length;
+    return count * datos.monto;
+  }
+
+  function renderMiniCalendar() {
+    const anio = hoy.getFullYear();
+    const mes = hoy.getMonth();
+    const primerDia = new Date(anio, mes, 1);
+    const ultimoDia = new Date(anio, mes + 1, 0);
+    const totalDias = ultimoDia.getDate();
+    const startOffset = primerDia.getDay() === 0 ? 6 : primerDia.getDay() - 1;
+
+    const headers = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
+    const celdas = headers.map((h) => '<div class="cal-header">' + h + '</div>');
+
+    for (let i = 0; i < startOffset; i++) {
+      celdas.push('<div class="cal-dia cal-blank"></div>');
+    }
+
+    for (let dia = 1; dia <= totalDias; dia++) {
+      const d = new Date(anio, mes, dia);
+      const key = fechaStr(d);
+      const c = !!datos.dias[key];
+      const esHoy = key === hoyKey;
+
+      let clase = 'cal-dia';
+      if (c) clase += ' cal-completado';
+      if (esHoy && !c) clase += ' cal-hoy-pendiente';
+      if (esHoy) clase += ' cal-hoy';
+
+      celdas.push(
+        '<button class="' +
+          clase +
+          '" data-date="' +
+          key +
+          '">' +
+          dia +
+          '</button>',
+      );
+    }
+
+    return celdas.join('');
   }
 
   function actualizarEstado(completada) {
     const monto = obtenerMonto();
+    const montoSpan = document.getElementById('meta-monto');
+
     if (completada) {
       banner.classList.remove('meta-pendiente');
       banner.classList.add('meta-completada');
       icono.textContent = '🐷😊';
-      fila.innerHTML =
-        '<span>Hoy cumpliste la meta de ahorro (</span>' +
-        '<span class="meta-monto" id="meta-monto">' + monto + '</span>' +
-        '<span> USD)</span>';
+      montoSpan.textContent = monto;
+      textoEl.textContent = 'Hoy cumpliste la meta de ahorro';
       btn.textContent = '✗ Rectificar';
       btn.className = 'meta-btn meta-btn-rectificar';
     } else {
       banner.classList.remove('meta-completada');
       banner.classList.add('meta-pendiente');
       icono.textContent = '🐷😢';
-      fila.innerHTML =
-        '<span>Hoy no has cumplido la meta de ahorro (</span>' +
-        '<span class="meta-monto" id="meta-monto">' + monto + '</span>' +
-        '<span> USD)</span>';
+      montoSpan.textContent = monto;
+      textoEl.textContent = 'Hoy no has cumplido la meta de ahorro';
       btn.textContent = '✓ Sí, ahorré';
       btn.className = 'meta-btn';
     }
   }
 
-  let completada = false;
+  function actualizarMeses() {
+    const ahora = new Date();
+    const mesActual = totalMes(ahora.getFullYear(), ahora.getMonth());
+    const mesAnt = new Date(ahora.getFullYear(), ahora.getMonth() - 1, 1);
+    const prevTotal = totalMes(mesAnt.getFullYear(), mesAnt.getMonth());
+
+    document.getElementById('meta-meses').textContent =
+      MESES[mesAnt.getMonth()] + ': ' + formatearUSD(prevTotal) +
+      '  ·  ' +
+      MESES[ahora.getMonth()] + ': ' + formatearUSD(mesActual);
+  }
+
+  const montoEl = document.getElementById('meta-monto');
+  if (montoEl) montoEl.textContent = String(datos.monto);
+  actualizarEstado(completada);
+  actualizarMeses();
 
   btn.addEventListener('click', () => {
+    const ahora = Date.now();
+    if (ahora - ultimoToggle < MIN_TOGGLE_INTERVAL) return;
+    ultimoToggle = ahora;
+
     completada = !completada;
+    datos.dias[hoyKey] = completada;
+    if (!completada) delete datos.dias[hoyKey];
+    guardarDatosAhorro(datos);
     actualizarEstado(completada);
+    actualizarMeses();
+  });
+
+  const popover = document.getElementById('cal-popover');
+  const popoverCuerpo = document.getElementById('cal-popover-cuerpo');
+  const popoverTitulo = document.getElementById('cal-popover-titulo');
+  const overlay = document.getElementById('cal-overlay');
+  const detallesBtn = document.getElementById('meta-detalles-btn');
+
+  function abrirPopover() {
+    const ahora = new Date();
+    popoverTitulo.textContent =
+      MESES[ahora.getMonth()] + ' ' + ahora.getFullYear();
+    popoverCuerpo.innerHTML =
+      '<div class="mini-calendar">' + renderMiniCalendar() + '</div>';
+    popover.classList.add('abierto');
+    overlay.classList.add('abierto');
+  }
+
+  function cerrarPopover() {
+    popover.classList.remove('abierto');
+    overlay.classList.remove('abierto');
+  }
+
+  detallesBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (popover.classList.contains('abierto')) {
+      cerrarPopover();
+    } else {
+      abrirPopover();
+    }
+  });
+
+  document.getElementById('cal-popover-close').addEventListener('click', cerrarPopover);
+
+  overlay.addEventListener('click', cerrarPopover);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && popover.classList.contains('abierto')) {
+      cerrarPopover();
+    }
+  });
+
+  popoverCuerpo.addEventListener('click', (e) => {
+    const diaBtn = e.target.closest('.cal-dia');
+    if (!diaBtn || diaBtn.classList.contains('cal-blank')) return;
+    const dateKey = diaBtn.dataset.date;
+    const now = Date.now();
+    if (now - ultimoToggle < MIN_TOGGLE_INTERVAL) return;
+    ultimoToggle = now;
+
+    datos.dias[dateKey] = !datos.dias[dateKey];
+    if (!datos.dias[dateKey]) delete datos.dias[dateKey];
+    guardarDatosAhorro(datos);
+
+    if (dateKey === hoyKey) {
+      completada = !!datos.dias[dateKey];
+      actualizarEstado(completada);
+    }
+    actualizarMeses();
+    popoverCuerpo.innerHTML =
+      '<div class="mini-calendar">' + renderMiniCalendar() + '</div>';
   });
 
   document.addEventListener('click', (e) => {
     const target = e.target;
-    if (target.id === 'meta-monto' || target.classList.contains('meta-monto')) {
+    if (
+      target.id === 'meta-monto' ||
+      target.classList.contains('meta-monto')
+    ) {
       const el = document.getElementById('meta-monto');
       const input = document.createElement('input');
       input.type = 'number';
@@ -873,8 +1037,12 @@ function renderizarMetaAhorro() {
       el.replaceWith(input);
       input.focus();
       input.addEventListener('blur', () => {
-        el.textContent = input.value || '5';
+        const nuevoValor = input.value || '5';
+        el.textContent = nuevoValor;
+        datos.monto = parseInt(nuevoValor, 10) || 5;
+        guardarDatosAhorro(datos);
         input.replaceWith(el);
+        actualizarMeses();
       });
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') input.blur();

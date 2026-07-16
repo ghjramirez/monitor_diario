@@ -33,14 +33,35 @@
     <main class="main">
       <section class="seccion seccion-meta" id="meta-ahorro">
         <div class="meta-banner meta-pendiente" id="meta-banner">
-          <span class="meta-icono" id="meta-icono">🐷😢</span>
-          <div class="meta-info">
-            <div class="meta-fila" id="meta-fila">
-              <span>Hoy no has cumplido la meta de ahorro (</span>
+          <div class="meta-top">
+            <span class="meta-icono" id="meta-icono">🐷😢</span>
+            <div class="meta-monto-group">
               <span class="meta-monto" id="meta-monto">5</span>
-              <span> USD)</span>
+              <span class="meta-monto-currency">USD</span>
+              <span class="meta-monto-label">Meta diaria</span>
             </div>
-            <button class="meta-btn" id="meta-btn">✓ Sí, ahorré</button>
+          </div>
+          <div class="meta-bottom">
+            <span class="meta-texto" id="meta-texto">Hoy no has cumplido la meta de ahorro</span>
+            <div class="meta-botones">
+              <button class="meta-btn" id="meta-btn">✓ Sí, ahorré</button>
+              <button class="meta-detalles-btn" id="meta-detalles-btn">📊 Detalles</button>
+            </div>
+          </div>
+        </div>
+        <div class="meta-meses" id="meta-meses"></div>
+        <div class="cal-overlay" id="cal-overlay"></div>
+        <div class="cal-popover" id="cal-popover">
+          <div class="cal-popover-inner">
+            <div class="cal-popover-header">
+              <span class="cal-popover-titulo" id="cal-popover-titulo"></span>
+              <button class="cal-popover-close" id="cal-popover-close">&times;</button>
+            </div>
+            <div class="cal-popover-cuerpo" id="cal-popover-cuerpo"></div>
+            <div class="cal-popover-leyenda">
+              <span class="cal-leyenda-item"><span class="cal-leyenda-dot cal-leyenda-verde"></span>Ahorrado</span>
+              <span class="cal-leyenda-item"><span class="cal-leyenda-dot cal-leyenda-rojo"></span>Hoy pendiente</span>
+            </div>
           </div>
         </div>
       </section>
