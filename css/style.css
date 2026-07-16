@@ -831,6 +831,7 @@ body.toolbox-abierto .toolbox-btn {
   padding: var(--space-3) var(--space-2);
   border-radius: var(--radius-md);
   transition: background 0.3s ease, border-color 0.3s ease;
+  min-height: 76px;
   border-left: 4px solid var(--danger);
   background: var(--danger-light);
 }
@@ -893,8 +894,9 @@ body.toolbox-abierto .toolbox-btn {
   filter: brightness(1.1);
 }
 
-.meta-btn:disabled {
-  display: none;
+.meta-btn-rectificar {
+  background: var(--warning);
+  color: #fff;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -820,32 +820,66 @@ async function cargarTodos() {
 
 function renderizarMetaAhorro() {
   const icono = document.getElementById('meta-icono');
-  const montoEl = document.getElementById('meta-monto');
   const btn = document.getElementById('meta-btn');
   const banner = document.getElementById('meta-banner');
+  const fila = document.getElementById('meta-fila');
+
+  function obtenerMonto() {
+    const el = document.getElementById('meta-monto');
+    return el ? el.textContent : '5';
+  }
+
+  function actualizarEstado(completada) {
+    const monto = obtenerMonto();
+    if (completada) {
+      banner.classList.remove('meta-pendiente');
+      banner.classList.add('meta-completada');
+      icono.textContent = '🐷😊';
+      fila.innerHTML =
+        '<span>Hoy cumpliste la meta de ahorro (</span>' +
+        '<span class="meta-monto" id="meta-monto">' + monto + '</span>' +
+        '<span> USD)</span>';
+      btn.textContent = '✗ Rectificar';
+      btn.className = 'meta-btn meta-btn-rectificar';
+    } else {
+      banner.classList.remove('meta-completada');
+      banner.classList.add('meta-pendiente');
+      icono.textContent = '🐷😢';
+      fila.innerHTML =
+        '<span>Hoy no has cumplido la meta de ahorro (</span>' +
+        '<span class="meta-monto" id="meta-monto">' + monto + '</span>' +
+        '<span> USD)</span>';
+      btn.textContent = '✓ Sí, ahorré';
+      btn.className = 'meta-btn';
+    }
+  }
+
+  let completada = false;
 
   btn.addEventListener('click', () => {
-    banner.classList.remove('meta-pendiente');
-    banner.classList.add('meta-completada');
-    icono.textContent = '🐷😊';
-    btn.disabled = true;
+    completada = !completada;
+    actualizarEstado(completada);
   });
 
-  montoEl.addEventListener('click', () => {
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.className = 'meta-monto-input';
-    input.value = montoEl.textContent;
-    input.min = 0;
-    montoEl.replaceWith(input);
-    input.focus();
-    input.addEventListener('blur', () => {
-      montoEl.textContent = input.value || '5';
-      input.replaceWith(montoEl);
-    });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') input.blur();
-    });
+  document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (target.id === 'meta-monto' || target.classList.contains('meta-monto')) {
+      const el = document.getElementById('meta-monto');
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.className = 'meta-monto-input';
+      input.value = el.textContent;
+      input.min = 0;
+      el.replaceWith(input);
+      input.focus();
+      input.addEventListener('blur', () => {
+        el.textContent = input.value || '5';
+        input.replaceWith(el);
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') input.blur();
+      });
+    }
   });
 }
 
