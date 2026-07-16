@@ -25,7 +25,47 @@ const NOMBRES_DOLAR = {
   tarjeta: 'Dólar Tarjeta',
 };
 
-let datosDolar = [];
+  let datosDolar = [];
+
+function renderClima(nombre, datos) {
+  const actual = datos.current;
+  const codigo = actual.weather_code;
+  const desc = WMO_CODES[codigo] || `🌡️ Código ${codigo}`;
+  const probHoy = datos.daily.precipitation_probability_max[0];
+  const probManana = datos.daily.precipitation_probability_max[1];
+  const maxHoy = datos.daily.temperature_2m_max[0];
+  const minHoy = datos.daily.temperature_2m_min[0];
+
+  return `
+          <div class="clima-grupo">
+              <h3 class="clima-titulo">${nombre}</h3>
+              <div class="cards">
+                  <div class="card">
+                      <div class="card-titulo">Temperatura</div>
+                      <div class="card-valor">${actual.temperature_2m}°C</div>
+                      <div class="card-subvalor">Sensación: ${actual.apparent_temperature}°C</div>
+                  </div>
+                  <div class="card">
+                      <div class="card-titulo">Condición</div>
+                      <div class="card-valor">${desc}</div>
+                  </div>
+                  <div class="card">
+                      <div class="card-titulo">Máx / Mín</div>
+                      <div class="card-valor">${maxHoy}° / ${minHoy}°</div>
+                  </div>
+                  <div class="card">
+                      <div class="card-titulo">Humedad</div>
+                      <div class="card-valor">${actual.relative_humidity_2m}%</div>
+                  </div>
+                  <div class="card">
+                      <div class="card-titulo">🌧️ Prob. lluvia</div>
+                      <div class="card-valor">${probHoy}%</div>
+                      <div class="card-subvalor">Mañana: ${probManana}%</div>
+                  </div>
+              </div>
+          </div>
+      `;
+}
 
 const WMO_CODES = {
   0: '☀️ Despejado',
@@ -111,7 +151,23 @@ function escapeHtml(str) {
 
 const FETCH_TIMEOUT = 10000;
 
+// ── Caché de respuestas API ──────────────────────────
+const apiCache = new Map();
+
+function getCacheTTL(url) {
+  if (url.includes('feriados'))   return 3600000; // 1 hora
+  if (url.includes('ramales'))    return 1800000; // 30 min
+  if (url.includes('open-meteo')) return 600000;  // 10 min
+  return 300000; // 5 min por defecto
+}
+
 async function fetchConTimeout(url, signal) {
+  const cacheKey = url;
+  const cached = apiCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < cached.ttl) {
+    return cached.response.clone();
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
   if (signal) {
@@ -119,6 +175,17 @@ async function fetchConTimeout(url, signal) {
   }
   try {
     const res = await fetch(url, { signal: controller.signal });
+    if (res.ok) {
+      const ttl = getCacheTTL(url);
+      apiCache.set(cacheKey, { response: res.clone(), timestamp: Date.now(), ttl });
+      // Limpiar entradas viejas si el caché crece demasiado
+      if (apiCache.size > 30) {
+        const umbral = Date.now() - 3600000;
+        for (const [k, v] of apiCache) {
+          if (v.timestamp < umbral) apiCache.delete(k);
+        }
+      }
+    }
     return res;
   } finally {
     clearTimeout(timeoutId);
@@ -138,9 +205,8 @@ function ultimoWeekday(anio, mes, weekday) {
 }
 
 const EVENTOS = [
-  { mes: 1, dia: 14, nombre: 'Día del Amor' },
   { mes: 2, dia: 14, nombre: 'San Valentín' },
-  { mes: 3, dia: 31, nombre: 'Día del Malvinero' },
+  { mes: 4, dia: 2, nombre: 'Día del Veterano y Caídos en Malvinas' },
   { mes: 7, dia: 20, nombre: 'Día del Amigo' },
   { mes: 9, dia: 21, nombre: 'Día del Estudiante' },
   { mes: 10, dia: 31, nombre: 'Halloween' },
@@ -204,11 +270,13 @@ function toggleSeccion(id) {
     boton.setAttribute('aria-expanded', 'false');
   }
 
-  localStorage.setItem(STORAGE_KEY_SECCIONES, JSON.stringify(
-    Object.fromEntries(
-      Array.from(document.querySelectorAll('.seccion')).map(s => [s.id, s.classList.contains('colapsada')])
-    )
-  ));
+  const ahoraColapsada = seccion.classList.contains('colapsada');
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_SECCIONES);
+    const estado = raw ? JSON.parse(raw) : {};
+    estado[id] = ahoraColapsada;
+    localStorage.setItem(STORAGE_KEY_SECCIONES, JSON.stringify(estado));
+  } catch {} // Si falla la lectura/escritura de localStorage, ignoramos
 }
 
 function actualizarReloj() {
@@ -296,46 +364,6 @@ async function cargarDolar(signal) {
 
 async function cargarClima(signal) {
   const contenedor = document.getElementById('clima-cards');
-
-  function renderClima(nombre, datos) {
-    const actual = datos.current;
-    const codigo = actual.weather_code;
-    const desc = WMO_CODES[codigo] || `🌡️ Código ${codigo}`;
-    const probHoy = datos.daily.precipitation_probability_max[0];
-    const probManana = datos.daily.precipitation_probability_max[1];
-    const maxHoy = datos.daily.temperature_2m_max[0];
-    const minHoy = datos.daily.temperature_2m_min[0];
-
-    return `
-            <div class="clima-grupo">
-                <h3 class="clima-titulo">${nombre}</h3>
-                <div class="cards">
-                    <div class="card">
-                        <div class="card-titulo">Temperatura</div>
-                        <div class="card-valor">${actual.temperature_2m}°C</div>
-                        <div class="card-subvalor">Sensación: ${actual.apparent_temperature}°C</div>
-                    </div>
-                    <div class="card">
-                        <div class="card-titulo">Condición</div>
-                        <div class="card-valor">${desc}</div>
-                    </div>
-                    <div class="card">
-                        <div class="card-titulo">Máx / Mín</div>
-                        <div class="card-valor">${maxHoy}° / ${minHoy}°</div>
-                    </div>
-                    <div class="card">
-                        <div class="card-titulo">Humedad</div>
-                        <div class="card-valor">${actual.relative_humidity_2m}%</div>
-                    </div>
-                    <div class="card">
-                        <div class="card-titulo">🌧️ Prob. lluvia</div>
-                        <div class="card-valor">${probHoy}%</div>
-                        <div class="card-subvalor">Mañana: ${probManana}%</div>
-                    </div>
-                </div>
-            </div>
-        `;
-  }
 
   try {
     const [resCaba, resQuilmes] = await Promise.all([
@@ -532,10 +560,10 @@ async function cargarArribos(signal) {
       fetchConTimeout(API_TRENES_ARRIBOS_QUILMES, signal),
     ]);
 
-    let datosConst = { results: [] };
-    let datosQuilmes = { results: [] };
-    if (resConst.ok) datosConst = await resConst.json();
-    if (resQuilmes.ok) datosQuilmes = await resQuilmes.json();
+    const [datosConst, datosQuilmes] = await Promise.all([
+      resConst.ok ? resConst.json() : { results: [] },
+      resQuilmes.ok ? resQuilmes.json() : { results: [] },
+    ]);
 
     const salidasConst = filtrarArribos(datosConst, 1);
     const llegadasQuilmes = filtrarArribos(datosQuilmes, 2);
@@ -769,10 +797,9 @@ function cargarTemporal() {
   const anio = ahora.getFullYear();
   const mes = ahora.getMonth();
   const diaMes = ahora.getDate();
-  const inicioAnio = new Date(anio, 0, 1);
-  const hoyMedianoche = new Date(anio, mes, diaMes);
-  const diaDelAnio =
-    Math.round((hoyMedianoche - inicioAnio) / 86400000) + 1;
+  const inicioAnioUTC = Date.UTC(anio, 0, 1);
+  const hoyUTC = Date.UTC(anio, mes, diaMes);
+  const diaDelAnio = ((hoyUTC - inicioAnioUTC) / 86400000) + 1;
   const totalDiasAnio =
     (anio % 4 === 0 && anio % 100 !== 0) || anio % 400 === 0
       ? 366
@@ -785,9 +812,10 @@ function cargarTemporal() {
   const pctMes = ((diaMes - 1) / totalDiasMes) * 100;
 
   const diaSemana = new Date(anio, 0, 1).getDay();
+  const diaSemanaOffset = diaSemana === 0 ? 6 : diaSemana - 1; // Monday = 0 (consistente con mini-calendario)
   const semanaActual =
-    Math.floor((diaDelAnio - 1 + diaSemana) / 7) + 1;
-  const totalSemanas = Math.ceil((totalDiasAnio + diaSemana) / 7);
+    Math.floor((diaDelAnio - 1 + diaSemanaOffset) / 7) + 1;
+  const totalSemanas = Math.ceil((totalDiasAnio + diaSemanaOffset) / 7);
 
   contenedor.innerHTML = `
     <div class="card">
@@ -861,7 +889,7 @@ async function cargarFeriados(signal) {
               <div class="card">
                   <div class="card-titulo">📅 ${dia} de ${mes}</div>
                   <div class="card-valor">${escapeHtml(f.nombre)}</div>
-                  ${f.tipo !== 'evento' ? `<div class="card-subvalor">${escapeHtml(f.tipo.charAt(0).toUpperCase() + f.tipo.slice(1))}</div>` : ''}
+                  ${f.tipo !== 'evento' ? `<div class="card-subvalor">${escapeHtml(f.tipo.charAt(0).toUpperCase() + f.tipo.slice(1))}</div>` : `<div class="card-subvalor">🎉 Evento personal</div>`}
               </div>
           `;
       })
@@ -944,11 +972,13 @@ function renderizarMetaAhorro() {
       const key = fechaStr(d);
       const c = !!datos.dias[key];
       const esHoy = key === hoyKey;
+      const esFuturo = key > hoyKey;
 
       let clase = 'cal-dia';
       if (c) clase += ' cal-completado';
       if (esHoy && !c) clase += ' cal-hoy-pendiente';
       if (esHoy) clase += ' cal-hoy';
+      if (esFuturo) clase += ' cal-futuro';
 
       celdas.push(
         '<button class="' +
@@ -971,7 +1001,7 @@ function renderizarMetaAhorro() {
     if (completada) {
       banner.classList.remove('meta-pendiente');
       banner.classList.add('meta-completada');
-      icono.textContent = '🐷😊';
+      icono.textContent = '🤑';
       montoSpan.textContent = monto;
       textoEl.textContent = 'Hoy cumpliste la meta de ahorro';
       btn.textContent = '✗ Rectificar';
@@ -979,7 +1009,7 @@ function renderizarMetaAhorro() {
     } else {
       banner.classList.remove('meta-completada');
       banner.classList.add('meta-pendiente');
-      icono.textContent = '🐷😢';
+      icono.textContent = '😢';
       montoSpan.textContent = monto;
       textoEl.textContent = 'Hoy no has cumplido la meta de ahorro';
       btn.textContent = '✓ Sí, ahorré';
@@ -1061,6 +1091,7 @@ function renderizarMetaAhorro() {
     const diaBtn = e.target.closest('.cal-dia');
     if (!diaBtn || diaBtn.classList.contains('cal-blank')) return;
     const dateKey = diaBtn.dataset.date;
+    if (dateKey > hoyKey) return;
     const now = Date.now();
     if (now - ultimoToggle < MIN_TOGGLE_INTERVAL) return;
     ultimoToggle = now;
@@ -1074,8 +1105,10 @@ function renderizarMetaAhorro() {
       actualizarEstado(completada);
     }
     actualizarMeses();
-    popoverCuerpo.innerHTML =
-      '<div class="mini-calendar">' + renderMiniCalendar() + '</div>';
+    // Mutar solo la celda cliqueada en vez de re-renderizar todo el calendario
+    const toggledOn = !!datos.dias[dateKey];
+    diaBtn.classList.toggle('cal-completado', toggledOn);
+    diaBtn.classList.remove('cal-hoy-pendiente');
   });
 
   document.addEventListener('click', (e) => {
@@ -1161,6 +1194,18 @@ document.addEventListener('DOMContentLoaded', () => {
   cargarTemporal();
   cargarTodos();
   intervaloDatos = setInterval(cargarTodos, 5 * 60 * 1000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearInterval(intervaloReloj);
+      clearInterval(intervaloDatos);
+    } else {
+      actualizarReloj();
+      cargarTodos();
+      intervaloReloj = setInterval(actualizarReloj, 1000);
+      intervaloDatos = setInterval(cargarTodos, 5 * 60 * 1000);
+    }
+  });
 });
 
 window.addEventListener('beforeunload', () => {

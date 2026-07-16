@@ -34,7 +34,7 @@
       <section class="seccion seccion-meta" id="meta-ahorro">
         <div class="meta-banner meta-pendiente" id="meta-banner">
           <div class="meta-top">
-            <span class="meta-icono" id="meta-icono">🐷😢</span>
+            <span class="meta-icono" id="meta-icono">😢</span>
             <div class="meta-monto-group">
               <span class="meta-monto" id="meta-monto">5</span>
               <span class="meta-monto-currency">USD</span>
@@ -42,10 +42,19 @@
             </div>
           </div>
           <div class="meta-bottom">
-            <span class="meta-texto" id="meta-texto">Hoy no has cumplido la meta de ahorro</span>
+            <span class="meta-texto" id="meta-texto"
+              >Hoy no has cumplido la meta de ahorro</span
+            >
             <div class="meta-botones">
-              <button class="meta-btn" id="meta-btn">✓ Sí, ahorré</button>
-              <button class="meta-detalles-btn" id="meta-detalles-btn">📊 Detalles</button>
+              <button class="meta-btn" id="meta-btn">
+                ✓ Sí, ahorré
+              </button>
+              <button
+                class="meta-detalles-btn"
+                id="meta-detalles-btn"
+              >
+                📊 Detalles
+              </button>
             </div>
           </div>
         </div>
@@ -54,13 +63,32 @@
         <div class="cal-popover" id="cal-popover">
           <div class="cal-popover-inner">
             <div class="cal-popover-header">
-              <span class="cal-popover-titulo" id="cal-popover-titulo"></span>
-              <button class="cal-popover-close" id="cal-popover-close">&times;</button>
+              <span
+                class="cal-popover-titulo"
+                id="cal-popover-titulo"
+              ></span>
+              <button
+                class="cal-popover-close"
+                id="cal-popover-close"
+              >
+                &times;
+              </button>
             </div>
-            <div class="cal-popover-cuerpo" id="cal-popover-cuerpo"></div>
+            <div
+              class="cal-popover-cuerpo"
+              id="cal-popover-cuerpo"
+            ></div>
             <div class="cal-popover-leyenda">
-              <span class="cal-leyenda-item"><span class="cal-leyenda-dot cal-leyenda-verde"></span>Ahorrado</span>
-              <span class="cal-leyenda-item"><span class="cal-leyenda-dot cal-leyenda-rojo"></span>Hoy pendiente</span>
+              <span class="cal-leyenda-item"
+                ><span
+                  class="cal-leyenda-dot cal-leyenda-verde"
+                ></span
+                >Ahorrado</span
+              >
+              <span class="cal-leyenda-item"
+                ><span class="cal-leyenda-dot cal-leyenda-rojo"></span
+                >Hoy pendiente</span
+              >
             </div>
           </div>
         </div>
@@ -117,6 +145,7 @@
               <div class="card-titulo">Cargando...</div>
             </div>
           </div>
+        </div>
       </section>
 
       <section class="seccion" id="clima">
@@ -185,25 +214,50 @@
       </p>
     </footer>
 
-    <button class="toolbox-btn" id="toolbox-btn" aria-label="Abrir herramientas" title="Herramientas">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="7" height="7" rx="1"/>
-        <rect x="14" y="3" width="7" height="7" rx="1"/>
-        <rect x="3" y="14" width="7" height="7" rx="1"/>
-        <rect x="14" y="14" width="7" height="7" rx="1"/>
+    <button
+      class="toolbox-btn"
+      id="toolbox-btn"
+      aria-label="Abrir herramientas"
+      title="Herramientas"
+    >
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
       </svg>
     </button>
     <div class="toolbox-overlay" id="toolbox-overlay"></div>
-    <aside class="toolbox" id="toolbox" role="dialog" aria-label="Panel de herramientas">
+    <aside
+      class="toolbox"
+      id="toolbox"
+      role="dialog"
+      aria-label="Panel de herramientas"
+    >
       <div class="toolbox-header">
         <h2 class="toolbox-titulo">Herramientas</h2>
-        <button class="toolbox-close" id="toolbox-close" aria-label="Cerrar panel">&times;</button>
+        <button
+          class="toolbox-close"
+          id="toolbox-close"
+          aria-label="Cerrar panel"
+        >
+          &times;
+        </button>
       </div>
       <nav class="toolbox-menu" id="toolbox-menu"></nav>
       <div class="toolbox-content" id="toolbox-content"></div>
     </aside>
 
     <h1 class="sr-only">Monitor Diario - Dashboard informativo</h1>
-    <script src="js/app.js"></script>
+    <script src="js/app.js" defer></script>
   </body>
 </html>

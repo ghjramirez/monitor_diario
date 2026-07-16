@@ -385,14 +385,6 @@ body {
   font-style: italic;
 }
 
-.conversor {
-  margin-top: var(--space-1);
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  padding: var(--space-1) var(--space-2);
-  box-shadow: var(--shadow);
-}
-
 .conversor-fila {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1130,6 +1122,12 @@ body.toolbox-abierto .toolbox-btn {
 
 .cal-dia.cal-hoy {
   font-weight: var(--weight-black);
+}
+
+.cal-dia.cal-futuro {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
 }
 
 .cal-blank {
