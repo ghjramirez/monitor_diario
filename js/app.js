@@ -361,7 +361,7 @@ async function cargarTrenes(signal) {
                     <div class="card-titulo">${escapeHtml(ramal.nombre)}</div>
                     <div class="card-valor">${textoEstado}</div>
                     <div class="card-subvalor">${ramal.es_electrico ? '⚡ Eléctrico' : '🚂 Diésel'}</div>
-                    ${tieneAlertas ? '<div class="card-subvalor" style="color: var(--warning)">⚠️ ' + ramal.alerta.length + ' alerta(s)</div>' : ''}
+                    ${tieneAlertas ? '<div class="card-subvalor alerta-indicador">⚠️ ' + ramal.alerta.length + ' alerta(s)</div>' : ''}
                 </div>
             `;
       })
@@ -818,6 +818,37 @@ async function cargarTodos() {
   actualizarTimestamp();
 }
 
+function renderizarMetaAhorro() {
+  const icono = document.getElementById('meta-icono');
+  const montoEl = document.getElementById('meta-monto');
+  const btn = document.getElementById('meta-btn');
+  const banner = document.getElementById('meta-banner');
+
+  btn.addEventListener('click', () => {
+    banner.classList.remove('meta-pendiente');
+    banner.classList.add('meta-completada');
+    icono.textContent = '🐷😊';
+    btn.disabled = true;
+  });
+
+  montoEl.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.className = 'meta-monto-input';
+    input.value = montoEl.textContent;
+    input.min = 0;
+    montoEl.replaceWith(input);
+    input.focus();
+    input.addEventListener('blur', () => {
+      montoEl.textContent = input.value || '5';
+      input.replaceWith(montoEl);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') input.blur();
+    });
+  });
+}
+
 let intervaloReloj = null;
 let intervaloDatos = null;
 
@@ -859,6 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   seleccionarHerramienta('calculadora');
 
+  renderizarMetaAhorro();
   cargarTemporal();
   cargarTodos();
   intervaloDatos = setInterval(cargarTodos, 5 * 60 * 1000);
