@@ -15,7 +15,8 @@
   --radius-md: 0.5rem;   /*  8px */
   --radius-lg: 1rem;     /* 16px */
 
-  /* Typography scale (modular 1.250) */
+  /* Typography scale (linear progressive) */
+  --text-xxs:    0.625rem;  /* 10px */
   --text-xs:     0.75rem;   /* 12px */
   --text-sm:     0.875rem;  /* 14px */
   --text-base:   1rem;      /* 16px */
@@ -25,10 +26,10 @@
 
   /* Font weights */
   --weight-normal:   400;
-  --weight-semibold: 500;
-  --weight-medium:  600;
-  --weight-bold:    700;
-  --weight-black:   800;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-black:    900;
 
   /* ── Paleta de colores ───────────────────────── */
 
@@ -37,15 +38,15 @@
   --bg-card:    #f2efe6;
   --text-primary:   #2b2b2b;
   --text-secondary: #505050;
-  --text-muted:     #707070;
+  --text-muted:     #5a5a5a;
 
   /* Secciones */
   --section-title-color: #6b0d23;
   --section-title-bg:    #f0d5a1;
 
   /* Acento */
-  --accent:      #a3875c;
-  --accent-text: #f5f0e8;
+  --accent:      #725631;
+  --accent-text: #ffffff;
 
   /* Cards */
   --card-titulo-color:   #3f3f3f;
@@ -83,6 +84,9 @@
     0 1px 2px rgba(0, 0, 0, 0.02);
   --shadow-md:
     0 4px 12px rgba(0, 0, 0, 0.06);
+
+  /* Utilidades */
+  --color-inverse: #ffffff;
 }
 
 * {
@@ -119,7 +123,7 @@ body {
 
 .header {
   background: var(--bg-card);
-  padding: 1rem 1.5rem;
+  padding: var(--space-2) var(--space-3);
   text-align: center;
   border-bottom: 1px solid var(--border);
   position: sticky;
@@ -129,7 +133,7 @@ body {
 
 .header h1 {
   font-size: var(--text-md);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   color: var(--text-primary);
   letter-spacing: -0.02em;
   margin-bottom: var(--space-1);
@@ -150,7 +154,7 @@ body {
 }
 
 .seccion {
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-4);
 }
 
 .seccion h2 {
@@ -225,7 +229,7 @@ body {
 
 .cards-compact .card-valor {
   font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
 }
 
 .cards-compact .card-subvalor {
@@ -341,7 +345,7 @@ body {
 
 .clima-titulo {
   font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   color: var(--text-primary);
   margin-bottom: var(--space-1);
   padding-left: var(--space-1);
@@ -416,7 +420,7 @@ body {
   padding: var(--space-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   font-size: var(--text-sm);
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -447,7 +451,7 @@ body {
   border-radius: var(--radius-md);
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   font-size: var(--text-sm);
   font-weight: var(--weight-normal);
   cursor: pointer;
@@ -487,7 +491,7 @@ body {
 
 .arribos-subtitulo {
   font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   color: var(--text-primary);
   margin-bottom: var(--space-1);
   padding-left: var(--space-1);
@@ -509,7 +513,7 @@ body {
   padding: var(--space-1);
   text-align: left;
   font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -527,7 +531,7 @@ body {
 
 .arribo-urgente td {
   color: var(--success);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
 }
 
 .arribo-proximo td {
@@ -721,7 +725,7 @@ body.toolbox-abierto .toolbox-btn {
   border-radius: var(--radius-md);
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   font-size: var(--text-xs);
   font-weight: var(--weight-normal);
   cursor: pointer;
@@ -773,7 +777,7 @@ body.toolbox-abierto .toolbox-btn {
   padding: var(--space-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   font-size: var(--text-sm);
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -882,7 +886,7 @@ body.toolbox-abierto .toolbox-btn {
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-top: 2px;
+  margin-top: 0;
 }
 
 .meta-bottom {
@@ -912,7 +916,7 @@ body.toolbox-abierto .toolbox-btn {
   border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
   font-family: inherit;
-  background: #fff;
+  background: var(--color-inverse);
 }
 
 .meta-btn {
@@ -935,7 +939,7 @@ body.toolbox-abierto .toolbox-btn {
 
 .meta-btn-rectificar {
   background: var(--warning);
-  color: #fff;
+  color: var(--color-inverse);
 }
 
 .meta-detalles-btn {
@@ -1046,7 +1050,7 @@ body.toolbox-abierto .toolbox-btn {
   gap: var(--space-2);
   padding: var(--space-1) var(--space-2);
   border-top: 1px solid var(--border);
-  font-size: 10px;
+  font-size: var(--text-xxs);
   color: var(--text-muted);
 }
 
@@ -1079,7 +1083,7 @@ body.toolbox-abierto .toolbox-btn {
 
 .cal-header {
   text-align: center;
-  font-size: 8px;
+  font-size: var(--text-xxs);
   font-weight: var(--weight-medium);
   color: var(--text-muted);
   text-transform: uppercase;
@@ -1092,12 +1096,12 @@ body.toolbox-abierto .toolbox-btn {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 22px;
-  font-size: 10px;
+  height: 24px;
+  font-size: var(--text-xxs);
   font-weight: var(--weight-medium);
   color: var(--text-primary);
   border: 1px solid transparent;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.1s ease;
   font-family: inherit;

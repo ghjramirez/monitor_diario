@@ -76,6 +76,7 @@ const MESES = [
 ];
 
 const STORAGE_KEY = 'monitor-ahorro';
+const STORAGE_KEY_SECCIONES = 'monitor-secciones';
 
 function cargarDatosAhorro() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -202,6 +203,12 @@ function toggleSeccion(id) {
     });
     boton.setAttribute('aria-expanded', 'false');
   }
+
+  localStorage.setItem(STORAGE_KEY_SECCIONES, JSON.stringify(
+    Object.fromEntries(
+      Array.from(document.querySelectorAll('.seccion')).map(s => [s.id, s.classList.contains('colapsada')])
+    )
+  ));
 }
 
 function actualizarReloj() {
@@ -560,6 +567,7 @@ function actualizarTimestamp() {
 }
 
 function actualizarConversor() {
+  if (!document.getElementById('conv-tipo')) return;
   const tipo = document.getElementById('conv-tipo').value;
   const dirBtn = document.querySelector('#conv-direccion .conv-btn.active');
   const direccion = dirBtn ? dirBtn.dataset.direction : 'usd-ars';
@@ -595,6 +603,7 @@ function actualizarConversor() {
 
 const HERRAMIENTAS = [
   { id: 'calculadora', nombre: 'Calculadora %', icono: '%' },
+  { id: 'conversor', nombre: 'Conversor Dólar', icono: '$' },
 ];
 
 let toolboxAbierta = false;
@@ -626,6 +635,7 @@ function seleccionarHerramienta(id) {
     btn.classList.toggle('active', btn.dataset.herramienta === id);
   });
   if (id === 'calculadora') renderizarCalculadora();
+  if (id === 'conversor') renderizarConversor();
 }
 
 function renderizarCalculadora() {
@@ -705,6 +715,52 @@ function actualizarCalculadora() {
       detalleEl.textContent = `Incremento: ${formatearNumero(v2 * (v1 / 100))}`;
       break;
   }
+}
+
+function renderizarConversor() {
+  const container = document.getElementById('toolbox-content');
+  container.innerHTML = `
+    <div class="herramienta">
+      <div class="conversor-fila">
+        <div class="conversor-campo">
+          <label for="conv-tipo">Tipo de dólar</label>
+          <select id="conv-tipo">
+            <option value="oficial">Dólar Oficial 🟢</option>
+            <option value="blue">Dólar Blue 🔵</option>
+            <option value="tarjeta">Dólar Tarjeta 💳</option>
+          </select>
+        </div>
+        <div class="conversor-campo">
+          <label>Dirección</label>
+          <div class="conversor-direccion" id="conv-direccion">
+            <button class="conv-btn active" data-direction="usd-ars">USD → ARS</button>
+            <button class="conv-btn" data-direction="ars-usd">ARS → USD</button>
+          </div>
+        </div>
+      </div>
+      <div class="conversor-fila">
+        <div class="conversor-campo">
+          <label for="conv-monto">Monto</label>
+          <input type="number" id="conv-monto" placeholder="Ingresá el monto" min="0" step="any">
+        </div>
+        <div class="conversor-campo">
+          <label>Resultado</label>
+          <div class="conversor-valor" id="conv-resultado">—</div>
+          <div class="conversor-tc" id="conv-tc">Cargando...</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('conv-tipo').addEventListener('change', actualizarConversor);
+  document.getElementById('conv-monto').addEventListener('input', actualizarConversor);
+  document.getElementById('conv-direccion').addEventListener('click', (e) => {
+    const btn = e.target.closest('.conv-btn');
+    if (!btn) return;
+    document.querySelectorAll('#conv-direccion .conv-btn').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    actualizarConversor();
+  });
+  actualizarConversor();
 }
 
 function cargarTemporal() {
@@ -1051,6 +1107,23 @@ function renderizarMetaAhorro() {
   });
 }
 
+function restaurarSecciones() {
+  const raw = localStorage.getItem(STORAGE_KEY_SECCIONES);
+  if (!raw) return;
+  try {
+    Object.entries(JSON.parse(raw)).forEach(([id, colapsada]) => {
+      if (!colapsada) return;
+      const seccion = document.getElementById(id);
+      if (!seccion) return;
+      seccion.classList.add('colapsada');
+      const contenido = seccion.querySelector('.seccion-contenido');
+      if (contenido) contenido.style.maxHeight = '0px';
+      const boton = seccion.querySelector('.seccion-toggle');
+      if (boton) boton.setAttribute('aria-expanded', 'false');
+    });
+  } catch {}
+}
+
 let intervaloReloj = null;
 let intervaloDatos = null;
 
@@ -1058,20 +1131,12 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarReloj();
   intervaloReloj = setInterval(actualizarReloj, 1000);
 
+  restaurarSecciones();
+
   document.querySelectorAll('.seccion-toggle').forEach((btn) => {
     const seccion = btn.closest('.seccion');
     const id = seccion.id;
     btn.addEventListener('click', () => toggleSeccion(id));
-  });
-
-  document.getElementById('conv-tipo').addEventListener('change', actualizarConversor);
-  document.getElementById('conv-monto').addEventListener('input', actualizarConversor);
-  document.getElementById('conv-direccion').addEventListener('click', (e) => {
-    const btn = e.target.closest('.conv-btn');
-    if (!btn) return;
-    document.querySelectorAll('#conv-direccion .conv-btn').forEach((b) => b.classList.remove('active'));
-    btn.classList.add('active');
-    actualizarConversor();
   });
 
   generarMenuToolbox();
