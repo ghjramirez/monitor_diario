@@ -889,7 +889,7 @@ async function cargarFeriados(signal) {
               <div class="card">
                   <div class="card-titulo">📅 ${dia} de ${mes}</div>
                   <div class="card-valor">${escapeHtml(f.nombre)}</div>
-                  ${f.tipo !== 'evento' ? `<div class="card-subvalor">${escapeHtml(f.tipo.charAt(0).toUpperCase() + f.tipo.slice(1))}</div>` : `<div class="card-subvalor">🎉 Evento personal</div>`}
+                  ${f.tipo !== 'evento' ? `<div class="card-subvalor">${escapeHtml(f.tipo.charAt(0).toUpperCase() + f.tipo.slice(1))}</div>` : ''}
               </div>
           `;
       })
