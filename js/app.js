@@ -589,7 +589,9 @@ async function cargarArribos(signal) {
 
 function actualizarTimestamp() {
   const ahora = new Date();
-  const timestamp = ahora.toLocaleString('es-AR');
+  const fecha = ahora.toLocaleDateString('es-AR');
+  const hora = ahora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const timestamp = `${fecha} ${hora}`;
   document.getElementById('ultima-actualizacion').textContent =
     timestamp;
 }
