@@ -33,57 +33,59 @@
 
   /* ── Paleta de colores ───────────────────────── */
 
-  /* Base */
-  --bg-primary: #e1d5c4;
-  --bg-card:    #f2efe6;
-  --text-primary:   #2b2b2b;
-  --text-secondary: #505050;
-  --text-muted:     #5a5a5a;
+  /* Base — Azul nocturno profundo (60%) */
+  --bg-primary: #0f1729;
+  --bg-card:    #172032;
+  --text-primary:   #f0eef5;
+  --text-secondary: #cdcad6;
+  --text-muted:     #a3a0ae;
 
-  /* Secciones */
-  --section-title-color: #6b0d23;
-  --section-title-bg:    #f0d5a1;
+  /* Secciones — Rosa malva apagado (30%) */
+  --section-title-color: #e8b6c8;
+  --section-title-bg:    #231a28;
 
-  /* Acento */
-  --accent:      #725631;
+  /* Acento — Rosa vibrante (10%) */
+  --accent:      #db6d8c;
   --accent-text: #ffffff;
 
   /* Cards */
-  --card-titulo-color:   #3f3f3f;
-  --card-valor-color:    #2b2b2b;
-  --card-subvalor-color: #505050;
+  --card-titulo-color:   #d9cad6;
+  --card-valor-color:    #f0eef5;
+  --card-subvalor-color: #b5b1c0;
 
   /* Barras de progreso */
-  --barra-bg:  #b2eabf;
-  --barra-fill: #5ed076;
+  --barra-bg:  #1e3350;
+  --barra-fill: #5c84b8;
 
   /* Tablas */
-  --table-header-color: #2b2b2b;
-  --table-header-bg:    #d1c0a8;
-  --table-hover-bg:     #d6cab5;
+  --table-header-color: #f0eef5;
+  --table-header-bg:    #1d263b;
+  --table-hover-bg:     #1a2337;
 
   /* Alertas */
-  --alerta-bg: #d6cab5;
+  --alerta-bg: #1f1825;
 
   /* Estados — WCAG AA garantizado */
-  --success:       #3d7a4e;
-  --success-light: #e4f0e6;
-  --success-text:  #f0faf2;
+  --success:       #5d9b7d;
+  --success-light: #1a2b24;
+  --success-btn:   #3e7a5a;
+  --success-text:  #f0faf7;
 
-  --warning:       #8a5a15;
-  --warning-light: #f5edd9;
+  --warning:       #c9a050;
+  --warning-light: #2a241a;
+  --warning-btn:   #8a6a30;
 
-  --danger:       #a13535;
-  --danger-light: #f5e0e0;
-  --danger-text:  #faf0f0;
+  --danger:       #d86a7a;
+  --danger-light: #2e1a1e;
+  --danger-text:  #fae8eb;
 
   /* Bordes y sombras */
-  --border:      #e6e3dc;
+  --border:      #25304a;
   --shadow:
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 1px 2px rgba(0, 0, 0, 0.02);
+    0 1px 3px rgba(0, 0, 0, 0.30),
+    0 1px 2px rgba(0, 0, 0, 0.15);
   --shadow-md:
-    0 4px 12px rgba(0, 0, 0, 0.06);
+    0 4px 12px rgba(0, 0, 0, 0.25);
 
   /* Utilidades */
   --color-inverse: #ffffff;
@@ -916,7 +918,7 @@ body.toolbox-abierto .toolbox-btn {
   padding: var(--space-1) var(--space-2);
   border: none;
   border-radius: var(--radius-md);
-  background: var(--success);
+  background: var(--success-btn);
   color: var(--success-text);
   font-family: inherit;
   font-size: var(--text-sm);
@@ -930,7 +932,7 @@ body.toolbox-abierto .toolbox-btn {
 }
 
 .meta-btn-rectificar {
-  background: var(--warning);
+  background: var(--warning-btn);
   color: var(--color-inverse);
 }
 
