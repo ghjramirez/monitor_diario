@@ -15,14 +15,14 @@ const API_TRENES_ARRIBOS_QUILMES =
   'https://ariedro.dev/api-trenes/arribos/estacion/322?cantidad=15';
 const RAMALES_FILTRADOS = [
   'Constitución-Bosques-Q',
-  'Constitución-La Plata',
+  'Constitución-La Plata'
 ];
 
 const TIPOS_DOLAR = ['oficial', 'blue', 'tarjeta'];
 const NOMBRES_DOLAR = {
   oficial: 'Dólar Oficial',
   blue: 'Dólar Blue',
-  tarjeta: 'Dólar Tarjeta',
+  tarjeta: 'Dólar Tarjeta'
 };
 
 let datosDolar = [];
@@ -88,7 +88,7 @@ const WMO_CODES = {
   82: '🌧️ Chubasco fuerte',
   95: '⛈️ Tormenta',
   96: '⛈️ Tormenta con granizo',
-  99: '⛈️ Tormenta fuerte con granizo',
+  99: '⛈️ Tormenta fuerte con granizo'
 };
 
 const DIAS = [
@@ -98,7 +98,7 @@ const DIAS = [
   'Miércoles',
   'Jueves',
   'Viernes',
-  'Sábado',
+  'Sábado'
 ];
 const MESES = [
   'Enero',
@@ -112,7 +112,7 @@ const MESES = [
   'Septiembre',
   'Octubre',
   'Noviembre',
-  'Diciembre',
+  'Diciembre'
 ];
 
 const STORAGE_KEY = 'monitor-ahorro';
@@ -124,7 +124,7 @@ const TICKER_FRASES = [
   'Escribe 100 palabras al día y en un año tendrás una novela',
   'La disciplina es el camino hacia la libertad',
   'No cuentes los pollitos antes de que nazcan',
-  'El miedo es el asesino de la mente',
+  'El miedo es el asesino de la mente'
 ];
 const TICKER_SEPARADOR = '\u00A0\u00A0\u00A0·\u00A0\u00A0\u00A0';
 
@@ -202,7 +202,7 @@ async function fetchConTimeout(url, signal) {
       apiCache.set(cacheKey, {
         response: res.clone(),
         timestamp: Date.now(),
-        ttl,
+        ttl
       });
       // Limpiar entradas viejas si el caché crece demasiado
       if (apiCache.size > 30) {
@@ -238,14 +238,14 @@ const EVENTOS = [
   { mes: 10, dia: 31, nombre: 'Halloween' },
   { mes: 11, dia: 1, nombre: 'Día de los Fieles Difuntos' },
   { mes: 12, dia: 24, nombre: 'Nochebuena' },
-  { mes: 12, dia: 31, nombre: 'Fin de Año' },
+  { mes: 12, dia: 31, nombre: 'Fin de Año' }
 ];
 
 function calcularDiasFijos(anio) {
   return EVENTOS.map((e) => ({
     fecha: new Date(anio, e.mes - 1, e.dia),
     nombre: e.nombre,
-    tipo: 'evento',
+    tipo: 'evento'
   }));
 }
 
@@ -253,21 +253,21 @@ function calcularDiasRelativos(anio) {
   const eventos = [
     {
       calcular: (y) => nthWeekday(y, 5, 0, 3),
-      nombre: 'Día del Padre',
+      nombre: 'Día del Padre'
     },
     {
       calcular: (y) => nthWeekday(y, 9, 0, 3),
-      nombre: 'Día de la Madre',
+      nombre: 'Día de la Madre'
     },
     {
       calcular: (y) => nthWeekday(y, 7, 0, 3),
-      nombre: 'Día del Niño',
-    },
+      nombre: 'Día del Niño'
+    }
   ];
   return eventos.map((e) => ({
     fecha: e.calcular(anio),
     nombre: e.nombre,
-    tipo: 'evento',
+    tipo: 'evento'
   }));
 }
 
@@ -329,7 +329,7 @@ function formatearMoneda(valor) {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 0
   }).format(num);
 }
 
@@ -340,7 +340,7 @@ function formatearUSD(valor) {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(num);
 }
 
@@ -349,7 +349,7 @@ function formatearNumero(valor) {
   if (isNaN(num)) return '-';
   return new Intl.NumberFormat('es-AR', {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(num);
 }
 
@@ -399,7 +399,7 @@ async function cargarClima(signal) {
   try {
     const [resCaba, resQuilmes] = await Promise.all([
       fetchConTimeout(API_CLIMA_CABA, signal),
-      fetchConTimeout(API_CLIMA_QUILMES, signal),
+      fetchConTimeout(API_CLIMA_QUILMES, signal)
     ]);
 
     let html = '';
@@ -503,7 +503,7 @@ function convertirHoraISO(iso) {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-    timeZone: 'America/Argentina/Buenos_Aires',
+    timeZone: 'America/Argentina/Buenos_Aires'
   });
 }
 
@@ -593,12 +593,12 @@ async function cargarArribos(signal) {
   try {
     const [resConst, resQuilmes] = await Promise.all([
       fetchConTimeout(API_TRENES_ARRIBOS_CONST, signal),
-      fetchConTimeout(API_TRENES_ARRIBOS_QUILMES, signal),
+      fetchConTimeout(API_TRENES_ARRIBOS_QUILMES, signal)
     ]);
 
     const [datosConst, datosQuilmes] = await Promise.all([
       resConst.ok ? resConst.json() : { results: [] },
-      resQuilmes.ok ? resQuilmes.json() : { results: [] },
+      resQuilmes.ok ? resQuilmes.json() : { results: [] }
     ]);
 
     const salidasConst = filtrarArribos(datosConst, 1);
@@ -629,7 +629,7 @@ function actualizarTimestamp() {
   const hora = ahora.toLocaleTimeString('es-AR', {
     hour: '2-digit',
     minute: '2-digit',
-    hour12: false,
+    hour12: false
   });
   const timestamp = `${fecha} ${hora}`;
   document.getElementById('ultima-actualizacion').textContent =
@@ -675,7 +675,7 @@ function actualizarConversor() {
 
 const HERRAMIENTAS = [
   { id: 'calculadora', nombre: 'Calculadora %', icono: '%' },
-  { id: 'conversor', nombre: 'Conversor Dólar', icono: '$' },
+  { id: 'conversor', nombre: 'Conversor Dólar', icono: '$' }
 ];
 
 let toolboxAbierta = false;
@@ -920,7 +920,7 @@ async function cargarFeriados(signal) {
 
   const eventosLocales = [
     ...calcularDiasFijos(anio),
-    ...calcularDiasRelativos(anio),
+    ...calcularDiasRelativos(anio)
   ];
 
   try {
@@ -934,7 +934,7 @@ async function cargarFeriados(signal) {
     const feriadosNormalizados = feriadosApi.map((f) => ({
       fecha: new Date(f.fecha + 'T00:00:00'),
       nombre: f.nombre,
-      tipo: f.tipo,
+      tipo: f.tipo
     }));
 
     const todos = [...feriadosNormalizados, ...eventosLocales]
@@ -982,7 +982,7 @@ async function cargarTodos() {
       cargarDolar(signal),
       cargarClima(signal),
       cargarTrenes(signal),
-      cargarArribos(signal),
+      cargarArribos(signal)
     ]);
   } catch (error) {
     if (error.name !== 'AbortError') {
@@ -995,9 +995,11 @@ async function cargarTodos() {
 function inicializarTicker() {
   const track = document.getElementById('ticker-track');
   const texto = document.getElementById('ticker-texto');
-  const contenido = TICKER_FRASES.join(TICKER_SEPARADOR);
-  texto.textContent = contenido + TICKER_SEPARADOR + contenido;
-  const duracion = Math.max(25, contenido.length * 0.25);
+  const frasesHtml = TICKER_FRASES.map(
+    (f) => `<span class="ticker-frase">${escapeHtml(f)}</span>`
+  ).join(TICKER_SEPARADOR);
+  texto.innerHTML = frasesHtml + TICKER_SEPARADOR + frasesHtml;
+  const duracion = Math.max(25, TICKER_FRASES.join(' ').length * 0.25);
   track.style.animationDuration = duracion + 's';
 }
 

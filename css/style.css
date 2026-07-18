@@ -2,90 +2,88 @@
   /* ── Design Tokens ──────────────────────────── */
 
   /* Spacing scale (8px grid) */
-  --space-0:   0;
-  --space-1:   0.5rem;   /*  8px */
-  --space-2:   1rem;     /* 16px */
-  --space-3:   1.5rem;   /* 24px */
-  --space-4:   2rem;     /* 32px */
-  --space-5:   2.5rem;   /* 40px */
-  --space-6:   3rem;     /* 48px */
+  --space-0: 0;
+  --space-1: 0.5rem; /*  8px */
+  --space-2: 1rem; /* 16px */
+  --space-3: 1.5rem; /* 24px */
+  --space-4: 2rem; /* 32px */
+  --space-5: 2.5rem; /* 40px */
+  --space-6: 3rem; /* 48px */
 
   /* Border radius */
-  --radius-sm: 0.25rem;  /*  4px */
-  --radius-md: 0.5rem;   /*  8px */
-  --radius-lg: 1rem;     /* 16px */
+  --radius-sm: 0.25rem; /*  4px */
+  --radius-md: 0.5rem; /*  8px */
+  --radius-lg: 1rem; /* 16px */
 
   /* Typography scale (linear progressive) */
-  --text-xxs:    0.625rem;  /* 10px */
-  --text-xs:     0.75rem;   /* 12px */
-  --text-sm:     0.875rem;  /* 14px */
-  --text-base:   1rem;      /* 16px */
-  --text-md:     1.125rem;  /* 18px */
-  --text-lg:     1.25rem;   /* 20px */
-  --text-xl:     1.5rem;    /* 24px */
+  --text-xxs: 0.625rem; /* 10px */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-md: 1.125rem; /* 18px */
+  --text-lg: 1.25rem; /* 20px */
+  --text-xl: 1.5rem; /* 24px */
 
   /* Font weights */
-  --weight-normal:   400;
-  --weight-medium:   500;
+  --weight-normal: 400;
+  --weight-medium: 500;
   --weight-semibold: 600;
-  --weight-bold:     700;
-  --weight-black:    900;
+  --weight-bold: 700;
+  --weight-black: 900;
 
   /* ── Paleta de colores ───────────────────────── */
 
   /* Base — Azul nocturno profundo (60%) */
   --bg-primary: #0f1729;
-  --bg-card:    #172032;
-  --text-primary:   #f0eef5;
+  --bg-card: #172032;
+  --text-primary: #f0eef5;
   --text-secondary: #cdcad6;
-  --text-muted:     #a3a0ae;
+  --text-muted: #a3a0ae;
 
   /* Secciones — Rosa malva apagado (30%) */
   --section-title-color: #e8b6c8;
-  --section-title-bg:    #231a28;
+  --section-title-bg: #231a28;
 
   /* Acento — Rosa vibrante (10%) */
-  --accent:      #db6d8c;
+  --accent: #db6d8c;
   --accent-text: #ffffff;
 
   /* Cards */
-  --card-titulo-color:   #d9cad6;
-  --card-valor-color:    #f0eef5;
+  --card-titulo-color: #d9cad6;
+  --card-valor-color: #f0eef5;
   --card-subvalor-color: #b5b1c0;
 
   /* Barras de progreso */
-  --barra-bg:  #1e3350;
+  --barra-bg: #1e3350;
   --barra-fill: #5c84b8;
 
   /* Tablas */
   --table-header-color: #f0eef5;
-  --table-header-bg:    #1d263b;
-  --table-hover-bg:     #1a2337;
+  --table-header-bg: #1d263b;
+  --table-hover-bg: #1a2337;
 
   /* Alertas */
   --alerta-bg: #1f1825;
 
   /* Estados — WCAG AA garantizado */
-  --success:       #5d9b7d;
+  --success: #5d9b7d;
   --success-light: #1a2b24;
-  --success-btn:   #3e7a5a;
-  --success-text:  #f0faf7;
+  --success-btn: #3e7a5a;
+  --success-text: #f0faf7;
 
-  --warning:       #c9a050;
+  --warning: #c9a050;
   --warning-light: #2a241a;
-  --warning-btn:   #8a6a30;
+  --warning-btn: #8a6a30;
 
-  --danger:       #d86a7a;
+  --danger: #d86a7a;
   --danger-light: #2e1a1e;
-  --danger-text:  #fae8eb;
+  --danger-text: #fae8eb;
 
   /* Bordes y sombras */
-  --border:      #25304a;
+  --border: #25304a;
   --shadow:
-    0 1px 3px rgba(0, 0, 0, 0.30),
-    0 1px 2px rgba(0, 0, 0, 0.15);
-  --shadow-md:
-    0 4px 12px rgba(0, 0, 0, 0.25);
+    0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
 
   /* Utilidades */
   --color-inverse: #ffffff;
@@ -198,7 +196,9 @@ body {
 
 .seccion-contenido {
   overflow: hidden;
-  transition: max-height 0.35s ease, opacity 0.25s ease;
+  transition:
+    max-height 0.35s ease,
+    opacity 0.25s ease;
   opacity: 1;
 }
 
@@ -409,7 +409,7 @@ body {
 }
 
 .conversor-campo select,
-.conversor-campo input[type="number"] {
+.conversor-campo input[type='number'] {
   width: 100%;
   padding: var(--space-1);
   border: 1px solid var(--border);
@@ -424,11 +424,11 @@ body {
 }
 
 .conversor-campo select:focus,
-.conversor-campo input[type="number"]:focus {
+.conversor-campo input[type='number']:focus {
   border-color: var(--accent);
 }
 
-.conversor-campo input[type="number"]::placeholder {
+.conversor-campo input[type='number']::placeholder {
   color: var(--text-muted);
   opacity: 0.6;
 }
@@ -618,7 +618,9 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-md);
-  transition: opacity 0.25s ease, filter 0.2s ease;
+  transition:
+    opacity 0.25s ease,
+    filter 0.2s ease;
 }
 
 .toolbox-btn:hover {
@@ -766,7 +768,7 @@ body.toolbox-abierto .toolbox-btn {
 }
 
 .herramienta-campo select,
-.herramienta-campo input[type="number"] {
+.herramienta-campo input[type='number'] {
   width: 100%;
   padding: var(--space-1);
   border: 1px solid var(--border);
@@ -781,11 +783,11 @@ body.toolbox-abierto .toolbox-btn {
 }
 
 .herramienta-campo select:focus,
-.herramienta-campo input[type="number"]:focus {
+.herramienta-campo input[type='number']:focus {
   border-color: var(--accent);
 }
 
-.herramienta-campo input[type="number"]::placeholder {
+.herramienta-campo input[type='number']::placeholder {
   color: var(--text-muted);
   opacity: 0.6;
 }
@@ -830,7 +832,9 @@ body.toolbox-abierto .toolbox-btn {
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
-  transition: background 0.3s ease, border-color 0.3s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
   border-left: 4px solid var(--danger);
   background: var(--danger-light);
 }
@@ -1157,6 +1161,10 @@ body.toolbox-abierto .toolbox-btn {
   font-size: var(--text-xs);
   color: var(--text-muted);
   font-style: italic;
+}
+
+.ticker-frase {
+  color: #e4c22e;
 }
 
 .ticker-contenedor:hover .ticker-track {
