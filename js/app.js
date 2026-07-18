@@ -25,7 +25,7 @@ const NOMBRES_DOLAR = {
   tarjeta: 'Dólar Tarjeta',
 };
 
-  let datosDolar = [];
+let datosDolar = [];
 
 function renderClima(nombre, datos) {
   const actual = datos.current;
@@ -118,11 +118,24 @@ const MESES = [
 const STORAGE_KEY = 'monitor-ahorro';
 const STORAGE_KEY_SECCIONES = 'monitor-secciones';
 
+const TICKER_FRASES = [
+  'El dinero crece en el árbol de la persistencia',
+  'A río revuelto, ganancia de pescadores',
+  'Escribe 100 palabras al día y en un año tendrás una novela',
+  'La disciplina es el camino hacia la libertad',
+  'No cuentes los pollitos antes de que nazcan',
+  'El miedo es el asesino de la mente',
+];
+const TICKER_SEPARADOR = '\u00A0\u00A0\u00A0·\u00A0\u00A0\u00A0';
+
 function cargarDatosAhorro() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return { monto: 5, dias: {} };
-  try { return JSON.parse(raw); }
-  catch { return { monto: 5, dias: {} }; }
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { monto: 5, dias: {} };
+  }
 }
 
 function guardarDatosAhorro(datos) {
@@ -130,9 +143,13 @@ function guardarDatosAhorro(datos) {
 }
 
 function fechaStr(d) {
-  return d.getFullYear() + '-' +
-    String(d.getMonth() + 1).padStart(2, '0') + '-' +
-    String(d.getDate()).padStart(2, '0');
+  return (
+    d.getFullYear() +
+    '-' +
+    String(d.getMonth() + 1).padStart(2, '0') +
+    '-' +
+    String(d.getDate()).padStart(2, '0')
+  );
 }
 
 function mesStr(anio, mes) {
@@ -155,9 +172,9 @@ const FETCH_TIMEOUT = 10000;
 const apiCache = new Map();
 
 function getCacheTTL(url) {
-  if (url.includes('feriados'))   return 3600000; // 1 hora
-  if (url.includes('ramales'))    return 1800000; // 30 min
-  if (url.includes('open-meteo')) return 600000;  // 10 min
+  if (url.includes('feriados')) return 3600000; // 1 hora
+  if (url.includes('ramales')) return 1800000; // 30 min
+  if (url.includes('open-meteo')) return 600000; // 10 min
   return 300000; // 5 min por defecto
 }
 
@@ -169,15 +186,24 @@ async function fetchConTimeout(url, signal) {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    FETCH_TIMEOUT,
+  );
   if (signal) {
-    signal.addEventListener('abort', () => controller.abort(), { once: true });
+    signal.addEventListener('abort', () => controller.abort(), {
+      once: true,
+    });
   }
   try {
     const res = await fetch(url, { signal: controller.signal });
     if (res.ok) {
       const ttl = getCacheTTL(url);
-      apiCache.set(cacheKey, { response: res.clone(), timestamp: Date.now(), ttl });
+      apiCache.set(cacheKey, {
+        response: res.clone(),
+        timestamp: Date.now(),
+        ttl,
+      });
       // Limpiar entradas viejas si el caché crece demasiado
       if (apiCache.size > 30) {
         const umbral = Date.now() - 3600000;
@@ -257,7 +283,9 @@ function toggleSeccion(id) {
     contenido.style.maxHeight = altura + 'px';
     contenido.addEventListener(
       'transitionend',
-      () => { contenido.style.maxHeight = ''; },
+      () => {
+        contenido.style.maxHeight = '';
+      },
       { once: true },
     );
     boton.setAttribute('aria-expanded', 'true');
@@ -275,7 +303,10 @@ function toggleSeccion(id) {
     const raw = localStorage.getItem(STORAGE_KEY_SECCIONES);
     const estado = raw ? JSON.parse(raw) : {};
     estado[id] = ahoraColapsada;
-    localStorage.setItem(STORAGE_KEY_SECCIONES, JSON.stringify(estado));
+    localStorage.setItem(
+      STORAGE_KEY_SECCIONES,
+      JSON.stringify(estado),
+    );
   } catch {} // Si falla la lectura/escritura de localStorage, ignoramos
 }
 
@@ -397,7 +428,10 @@ async function cargarTrenes(signal) {
   const contenedorAlertas = document.getElementById('trenes-alertas');
 
   try {
-    const respuesta = await fetchConTimeout(API_TRENES_RAMALES, signal);
+    const respuesta = await fetchConTimeout(
+      API_TRENES_RAMALES,
+      signal,
+    );
     if (!respuesta.ok)
       throw new Error('Error al obtener datos de trenes');
     const ramales = await respuesta.json();
@@ -500,10 +534,12 @@ function renderTablaArribos(titulo, arribos, esSalida) {
                 <tbody>
                     ${arribos
                       .map((a) => {
-                        const ramal = escapeHtml(a.servicio.ramal.nombre.replace(
-                          'Constitución-',
-                          '',
-                        ));
+                        const ramal = escapeHtml(
+                          a.servicio.ramal.nombre.replace(
+                            'Constitución-',
+                            '',
+                          ),
+                        );
                         const horaProgramada = esSalida
                           ? a.arribo.salida &&
                             a.arribo.salida.programada
@@ -590,7 +626,11 @@ async function cargarArribos(signal) {
 function actualizarTimestamp() {
   const ahora = new Date();
   const fecha = ahora.toLocaleDateString('es-AR');
-  const hora = ahora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const hora = ahora.toLocaleTimeString('es-AR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
   const timestamp = `${fecha} ${hora}`;
   document.getElementById('ultima-actualizacion').textContent =
     timestamp;
@@ -599,7 +639,9 @@ function actualizarTimestamp() {
 function actualizarConversor() {
   if (!document.getElementById('conv-tipo')) return;
   const tipo = document.getElementById('conv-tipo').value;
-  const dirBtn = document.querySelector('#conv-direccion .conv-btn.active');
+  const dirBtn = document.querySelector(
+    '#conv-direccion .conv-btn.active',
+  );
   const direccion = dirBtn ? dirBtn.dataset.direction : 'usd-ars';
   const montoInput = document.getElementById('conv-monto');
   const monto = parseFloat(montoInput.value);
@@ -642,8 +684,12 @@ let herramientaActiva = 'calculadora';
 function toggleToolbox(abrir) {
   const abriendo = abrir !== undefined ? abrir : !toolboxAbierta;
   toolboxAbierta = abriendo;
-  document.getElementById('toolbox').classList.toggle('abierto', abriendo);
-  document.getElementById('toolbox-overlay').classList.toggle('abierto', abriendo);
+  document
+    .getElementById('toolbox')
+    .classList.toggle('abierto', abriendo);
+  document
+    .getElementById('toolbox-overlay')
+    .classList.toggle('abierto', abriendo);
   document.body.classList.toggle('toolbox-abierto', abriendo);
 }
 
@@ -696,9 +742,15 @@ function renderizarCalculadora() {
       </div>
     </div>
   `;
-  document.getElementById('calc-modo').addEventListener('change', actualizarCalculadora);
-  document.getElementById('calc-valor1').addEventListener('input', actualizarCalculadora);
-  document.getElementById('calc-valor2').addEventListener('input', actualizarCalculadora);
+  document
+    .getElementById('calc-modo')
+    .addEventListener('change', actualizarCalculadora);
+  document
+    .getElementById('calc-valor1')
+    .addEventListener('input', actualizarCalculadora);
+  document
+    .getElementById('calc-valor2')
+    .addEventListener('input', actualizarCalculadora);
   actualizarCalculadora();
 }
 
@@ -781,15 +833,23 @@ function renderizarConversor() {
       </div>
     </div>
   `;
-  document.getElementById('conv-tipo').addEventListener('change', actualizarConversor);
-  document.getElementById('conv-monto').addEventListener('input', actualizarConversor);
-  document.getElementById('conv-direccion').addEventListener('click', (e) => {
-    const btn = e.target.closest('.conv-btn');
-    if (!btn) return;
-    document.querySelectorAll('#conv-direccion .conv-btn').forEach((b) => b.classList.remove('active'));
-    btn.classList.add('active');
-    actualizarConversor();
-  });
+  document
+    .getElementById('conv-tipo')
+    .addEventListener('change', actualizarConversor);
+  document
+    .getElementById('conv-monto')
+    .addEventListener('input', actualizarConversor);
+  document
+    .getElementById('conv-direccion')
+    .addEventListener('click', (e) => {
+      const btn = e.target.closest('.conv-btn');
+      if (!btn) return;
+      document
+        .querySelectorAll('#conv-direccion .conv-btn')
+        .forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      actualizarConversor();
+    });
   actualizarConversor();
 }
 
@@ -801,7 +861,7 @@ function cargarTemporal() {
   const diaMes = ahora.getDate();
   const inicioAnioUTC = Date.UTC(anio, 0, 1);
   const hoyUTC = Date.UTC(anio, mes, diaMes);
-  const diaDelAnio = ((hoyUTC - inicioAnioUTC) / 86400000) + 1;
+  const diaDelAnio = (hoyUTC - inicioAnioUTC) / 86400000 + 1;
   const totalDiasAnio =
     (anio % 4 === 0 && anio % 100 !== 0) || anio % 400 === 0
       ? 366
@@ -817,7 +877,9 @@ function cargarTemporal() {
   const diaSemanaOffset = diaSemana === 0 ? 6 : diaSemana - 1; // Monday = 0 (consistente con mini-calendario)
   const semanaActual =
     Math.floor((diaDelAnio - 1 + diaSemanaOffset) / 7) + 1;
-  const totalSemanas = Math.ceil((totalDiasAnio + diaSemanaOffset) / 7);
+  const totalSemanas = Math.ceil(
+    (totalDiasAnio + diaSemanaOffset) / 7,
+  );
 
   contenedor.innerHTML = `
     <div class="card">
@@ -862,7 +924,10 @@ async function cargarFeriados(signal) {
   ];
 
   try {
-    const respuesta = await fetchConTimeout(`${API_FERIADOS}${anio}`, signal);
+    const respuesta = await fetchConTimeout(
+      `${API_FERIADOS}${anio}`,
+      signal,
+    );
     if (!respuesta.ok) throw new Error('Error al obtener feriados');
     const feriadosApi = await respuesta.json();
 
@@ -927,6 +992,15 @@ async function cargarTodos() {
   actualizarTimestamp();
 }
 
+function inicializarTicker() {
+  const track = document.getElementById('ticker-track');
+  const texto = document.getElementById('ticker-texto');
+  const contenido = TICKER_FRASES.join(TICKER_SEPARADOR);
+  texto.textContent = contenido + TICKER_SEPARADOR + contenido;
+  const duracion = Math.max(25, contenido.length * 0.25);
+  track.style.animationDuration = duracion + 's';
+}
+
 function renderizarMetaAhorro() {
   const datos = cargarDatosAhorro();
   const hoy = new Date();
@@ -960,10 +1034,13 @@ function renderizarMetaAhorro() {
     const primerDia = new Date(anio, mes, 1);
     const ultimoDia = new Date(anio, mes + 1, 0);
     const totalDias = ultimoDia.getDate();
-    const startOffset = primerDia.getDay() === 0 ? 6 : primerDia.getDay() - 1;
+    const startOffset =
+      primerDia.getDay() === 0 ? 6 : primerDia.getDay() - 1;
 
     const headers = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
-    const celdas = headers.map((h) => '<div class="cal-header">' + h + '</div>');
+    const celdas = headers.map(
+      (h) => '<div class="cal-header">' + h + '</div>',
+    );
 
     for (let i = 0; i < startOffset; i++) {
       celdas.push('<div class="cal-dia cal-blank"></div>');
@@ -1022,13 +1099,24 @@ function renderizarMetaAhorro() {
   function actualizarMeses() {
     const ahora = new Date();
     const mesActual = totalMes(ahora.getFullYear(), ahora.getMonth());
-    const mesAnt = new Date(ahora.getFullYear(), ahora.getMonth() - 1, 1);
-    const prevTotal = totalMes(mesAnt.getFullYear(), mesAnt.getMonth());
+    const mesAnt = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth() - 1,
+      1,
+    );
+    const prevTotal = totalMes(
+      mesAnt.getFullYear(),
+      mesAnt.getMonth(),
+    );
 
     document.getElementById('meta-meses').textContent =
-      MESES[mesAnt.getMonth()] + ': ' + formatearUSD(prevTotal) +
+      MESES[mesAnt.getMonth()] +
+      ': ' +
+      formatearUSD(prevTotal) +
       '  ·  ' +
-      MESES[ahora.getMonth()] + ': ' + formatearUSD(mesActual);
+      MESES[ahora.getMonth()] +
+      ': ' +
+      formatearUSD(mesActual);
   }
 
   const montoEl = document.getElementById('meta-monto');
@@ -1079,7 +1167,9 @@ function renderizarMetaAhorro() {
     }
   });
 
-  document.getElementById('cal-popover-close').addEventListener('click', cerrarPopover);
+  document
+    .getElementById('cal-popover-close')
+    .addEventListener('click', cerrarPopover);
 
   overlay.addEventListener('click', cerrarPopover);
 
@@ -1176,22 +1266,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   generarMenuToolbox();
 
-  document.getElementById('toolbox-btn').addEventListener('click', () => toggleToolbox(true));
-  document.getElementById('toolbox-close').addEventListener('click', () => toggleToolbox(false));
-  document.getElementById('toolbox-overlay').addEventListener('click', () => toggleToolbox(false));
+  document
+    .getElementById('toolbox-btn')
+    .addEventListener('click', () => toggleToolbox(true));
+  document
+    .getElementById('toolbox-close')
+    .addEventListener('click', () => toggleToolbox(false));
+  document
+    .getElementById('toolbox-overlay')
+    .addEventListener('click', () => toggleToolbox(false));
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && toolboxAbierta) toggleToolbox(false);
   });
 
-  document.getElementById('toolbox-menu').addEventListener('click', (e) => {
-    const item = e.target.closest('.toolbox-menu-item');
-    if (!item) return;
-    seleccionarHerramienta(item.dataset.herramienta);
-  });
+  document
+    .getElementById('toolbox-menu')
+    .addEventListener('click', (e) => {
+      const item = e.target.closest('.toolbox-menu-item');
+      if (!item) return;
+      seleccionarHerramienta(item.dataset.herramienta);
+    });
 
   seleccionarHerramienta('calculadora');
 
+  inicializarTicker();
   renderizarMetaAhorro();
   cargarTemporal();
   cargarTodos();

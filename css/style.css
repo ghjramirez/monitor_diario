@@ -1139,6 +1139,39 @@ body.toolbox-abierto .toolbox-btn {
   pointer-events: none;
 }
 
+.ticker-contenedor {
+  width: 100%;
+  overflow: hidden;
+  margin-top: var(--space-1);
+  height: 1.5rem;
+}
+
+.ticker-track {
+  display: inline-block;
+  white-space: nowrap;
+  animation: ticker-scroll 35s linear infinite;
+  will-change: transform;
+}
+
+.ticker-texto {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.ticker-contenedor:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
